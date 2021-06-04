@@ -66,8 +66,8 @@ if __name__ == "__main__":
           author = 'David Ogden',
           license = 'Apache-2.0',
           url = 'https://github.com/dav-og/liteBEM',
-          packages = ['litebem'] # 'libDelhommeau', 'libDelhommeau.green_functions'],
-          # install_requires = ['numpy', 'scipy'], # 'pandas', 'xarray'
+          packages = ['litebem'], # 'libDelhommeau', 'libDelhommeau.green_functions'],
+          install_requires = ['pytest']#'numpy', 'scipy'], # 'pandas', 'xarray'
           # entry_points={
           #     'console_scripts': [
           #         'capytaine=capytaine.ui.cli:main',

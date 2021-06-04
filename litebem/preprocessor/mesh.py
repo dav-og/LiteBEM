@@ -134,7 +134,7 @@ def read_nemoh_mesh(filename):#
     with open(filename) as f:
         for iline, line in enumerate(f):
             if iline == 0:
-                header = np.asarray(line.split(), dtype=np.int)
+                header = np.asarray(line.split(), dtype=int)
                 continue
             if np.count_nonzero(np.asarray(line.split()) == '0') == 4:
                 ftoggle = 1
@@ -142,10 +142,10 @@ def read_nemoh_mesh(filename):#
             if np.count_nonzero(np.asarray(line.split()) == '0') == 4:
                 break
             if ftoggle == 0:
-                vertices.append(np.asarray(line.split(), dtype=np.float)[1:])
+                vertices.append(np.asarray(line.split(), dtype=float)[1:])
                 continue
             if ftoggle == 1:
-                faces.append(np.asarray(line.split(), dtype=np.int))
+                faces.append(np.asarray(line.split(), dtype=int))
                 continue
 
     return header, vertices, faces
