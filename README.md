@@ -1,19 +1,31 @@
 # LiteBEM
-A lightweight BEM solver based on Matthieu Ancellin's refactored Nemoh code (libDelhommeau).
+A lightweight BEM solver based on Matthieu Ancellin's refactored Nemoh code (libDelhommeau)
+
+## Requirements
+  - Conda is recommended for managing your Python distribution, dependencies and environment:
+    - https://docs.conda.io/en/latest/miniconda.html 
+    - Current development efforts are based on Python 3.9
 
 ## Installation for Developers
 Recommended approach:
-- Install the latest version of conda:
-  - https://docs.conda.io/en/latest/miniconda.html 
+
 - Open a conda powershell and create a new environment for LiteBEM-related development (e.g. "liteBemDev")
-  - `>> conda create --name liteBemDev`
-- Install some dependencies within your LiteBEM development environment:
-  - `>> conda activate liteBemDev`
-  - `>> conda install numpy`
-  - `>> conda deactivate liteBemDev`
-- Now clone the LiteBEM repo to your preferred location (e.g. "C:/code/")
-  - `>> cd C:/code/`
-  - `>> git clone https://github.com/dav-og/LiteBEM.git`
-- Now install LiteBEM as a developer!
-  - `>> cd LiteBEM`
-  - `>> python setup.py develop`
+  ```shell
+  > conda create --name liteBemDev
+  ```
+- Install numpy (numpy's f2py is required to compile Fortran code) within your LiteBEM development environment:
+  ```shell
+  > conda activate liteBemDev
+  > conda install numpy
+  ```
+  - **TODO:** Other dependencies can be defined in ```setup(install_requires=[])```
+- Clone the LiteBEM repo to your preferred location (e.g. "C:/code/")
+  ```shell
+  > cd C:/code/
+  > git clone https://github.com/dav-og/LiteBEM.git
+  ```
+- Install LiteBEM as a developer!
+  ```shell
+  > cd LiteBEM
+  > python setup.py develop
+  ```
