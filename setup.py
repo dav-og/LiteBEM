@@ -66,7 +66,7 @@ if __name__ == "__main__":
           author = 'David Ogden',
           license = 'Apache-2.0',
           url = 'https://github.com/dav-og/liteBEM',
-          # packages = ['libDelhommeau', 'libDelhommeau.green_functions'],
+          packages = ['litebem'] # 'libDelhommeau', 'libDelhommeau.green_functions'],
           # install_requires = ['numpy', 'scipy'], # 'pandas', 'xarray'
           # entry_points={
           #     'console_scripts': [
