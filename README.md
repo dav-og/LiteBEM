@@ -36,3 +36,5 @@ Recommended approach:
   - `(liteBemDev) > conda list`
   - if its not installed then do:
     - `(liteBemDev) > conda install pytest`)
+
+- Navigate to `LiteBEM/tests/unit` and run `pytest unit_tests.py`
