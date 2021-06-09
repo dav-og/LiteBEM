@@ -7,31 +7,34 @@ import numpy as np
 # from libDelhommeau.pre_processor.mesh import read_nemoh_mesh, Mesh
 import litebem.preprocessor.mesh as lpm
 
-testMeshLoc =  f'../unit/data/boat_200.mar' #f'../testMesh.nemoh' #
+
+# test read mesh functions
+
+boatMeshPath =  f'../unit/data/boat_200.mar'
 
 def test_read_nemoh_mesh_nfaces():
-    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(testMeshLoc)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'myMesh')
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(boatMeshPath)
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
     assert mesh.nfaces == 500
 
 def test_read_nemoh_mesh_ntriangles():
-    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(testMeshLoc)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'myMesh')
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(boatMeshPath)
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
     assert len(mesh.trianglesIDs) == 500
 
 def test_read_nemoh_mesh_nquads():
-    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(testMeshLoc)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'myMesh')
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(boatMeshPath)
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
     assert len(mesh.quadranglesIDs) == 0
 
 # def test_compute_face_normals():
-#     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(testMeshLoc)
-#     mesh = lpm.Mesh(meshVerts, meshFaces, name=f'myMesh')
+#     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(boatMeshPath)
+#     mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
 #     mesh.compute_face_normals_areas()
 #     assert len(mesh.faceUnitNormals) == 500
 
-# meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(testMeshLoc)
-# mesh = lpm.Mesh(meshVerts, meshFaces, name=f'myMesh')
+# meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(boatMeshPath)
+# mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
 # mesh.compute_face_normals_areas()
 
 # TODO: create Body object in pre_processor.mesh that can be passed to

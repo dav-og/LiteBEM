@@ -11,24 +11,24 @@ class Mesh():
     vertices : array_like of shape (nv, 3)
         Array of mesh vertices coordinates. Each line of the array represents one vertex
         coordinates
-    faces : array_like of shape (nf, 4)
-        Arrays of mesh connectivities for faces. Each line of the array represents indices of
+    panels : array_like of shape (nf, 4)
+        Arrays of mesh connectivities for panels. Each line of the array represents indices of
         vertices that form the face, expressed in counterclockwise order to ensure outward normals
         description.
     name : str, optional
         The name of the mesh.
     """
 
-    def __init__(self, vertices=None, faces=None, name=None):
+    def __init__(self, vertices=None, panels=None, name=None):
         self.vertices = vertices
-        self.faces = faces
-        self.nfaces = len(faces)
+        self.panels = panels
+        self.nfaces = len(panels)
         self.get_triangle_quad_ids()
 
     def get_triangle_quad_ids(self):
         trianglesIDs = []
         quadranglesIDs = []
-        for iFace, face in enumerate(self.faces):
+        for iFace, face in enumerate(self.panels):
             if len(np.unique(face)) == 3:
                 trianglesIDs.append(iFace+1)
             elif len(np.unique(face)) == 4:
@@ -46,7 +46,7 @@ class Mesh():
     #     faces_areas = np.zeros(nf)
     #     faces_centers = np.zeros((self.nfaces, 3))
 
-    #     triangleNormals = np.cross(self.vertices[self.trianglesIDs])self.faces[trianglesIDs] =
+    #     triangleNormals = np.cross(self.vertices[self.trianglesIDs])self.panels[trianglesIDs] =
 
     def compute_face_properties(self):
         '''calculate face normal vectors, areas, centers and radii'''
@@ -54,7 +54,7 @@ class Mesh():
         faceAreas = []
         faceCenters = []
         faceRadii = []
-        for iFace, face in enumerate(self.faces):
+        for iFace, face in enumerate(self.panels):
             if iFace+1 in self.trianglesIDs:
                 triangleNormal = np.cross(self.vertices[face[1]-1] - self.vertices[face[0]-1],
                                           self.vertices[face[2]-1] - self.vertices[face[0]-1])
@@ -126,26 +126,54 @@ class Mesh():
     # https://github.com/LHEEA/Nemoh/blob/49393be96bd590e267bfbc16347b665cda0edeb8/preProcessor/Mesh.f90#L207
 
 
-def read_nemoh_mesh(filename):#
-    '''read .nemoh mesh file; return headers, vertices and panels as arrays'''
+def read_nemoh_mesh(pathToMesh):#
+    '''
+    reads nemoh mesh file; return headers, vertices and panels.
+
+    Parameters
+    ----------
+    pathToMesh: str
+        path to the nemoh mesh file (i.e. .mar or .nemoh format mesh)
+
+    Returns
+    -------
+    header : array
+    vertices : array
+    panels : array
+
+    Raises
+    ------
+    None
+
+    Notes
+    -----
+    - nemoh meshes have two parts: a list of vertices in 3D space, and a list of
+      panel definitions that describes how the vertices are joined together
+    - this read function is expecting the use of lines containing 4 or more
+      zeros in the mesh file to seperate the list of vertices and panels (and at
+      the end of the file)
+    '''
     vertices = []
-    faces = []
-    ftoggle = 0
-    with open(filename) as f:
+    panels = []
+    ftoggle = 0 # toggle - if reading mesh vertices or panel definitions
+    with open(pathToMesh) as f:
         for iline, line in enumerate(f):
+            # read header line
             if iline == 0:
                 header = np.asarray(line.split(), dtype=int)
                 continue
-            if np.count_nonzero(np.asarray(line.split()) == '0') == 4:
+            # catch '0 0 0 0' divider in nemoh mesh file
+            if np.count_nonzero(np.asarray(line.split()) == '0') >= 4:
                 ftoggle = 1
                 continue
-            if np.count_nonzero(np.asarray(line.split()) == '0') == 4:
-                break
+            # append each vertex to list
             if ftoggle == 0:
                 vertices.append(np.asarray(line.split(), dtype=float)[1:])
                 continue
+            # append each panel to list
             if ftoggle == 1:
-                faces.append(np.asarray(line.split(), dtype=int))
+                panels.append(np.asarray(line.split(), dtype=int))
                 continue
-
-    return header, vertices, faces
+            if np.count_nonzero(np.asarray(line.split()) == '0') >= 4:
+                break
+    return header, vertices, panels
