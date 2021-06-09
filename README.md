@@ -33,8 +33,15 @@ Recommended approach:
 ## Run Tests
 
 - Make sure `pytest` is installed in your working environment:
-  - `(liteBemDev) > conda list`
+  ```shell
+  (liteBemDev) > conda list
+  ```
   - if its not installed then do:
-    - `(liteBemDev) > conda install pytest`)
+    ```shell
+    (liteBemDev) > conda install pytest
+    ```
 
-- Navigate to `LiteBEM/tests/unit` and run `pytest unit_tests.py`
+- Navigate to `LiteBEM/tests/unit` and run:
+  ```shell
+  (liteBemDev) > pytest unit_tests.py
+  ```
