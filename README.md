@@ -29,3 +29,10 @@ Recommended approach:
   > cd LiteBEM
   > python setup.py develop
   ```
+
+## Run Tests
+
+- Make sure `pytest` is installed in your working environment:
+  - `(liteBemDev) > conda list`
+  - if its not installed then do:
+    - `(liteBemDev) > conda install pytest`)
