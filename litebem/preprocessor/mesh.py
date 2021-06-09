@@ -13,7 +13,7 @@ class Mesh():
         coordinates
     panels : array_like of shape (nf, 4)
         Arrays of mesh connectivities for panels. Each line of the array represents indices of
-        vertices that form the face, expressed in counterclockwise order to ensure outward normals
+        vertices that form the panel, expressed in counterclockwise order to ensure outward normals
         description.
     name : str, optional
         The name of the mesh.
@@ -22,64 +22,62 @@ class Mesh():
     def __init__(self, vertices=None, panels=None, name=None):
         self.vertices = vertices
         self.panels = panels
-        self.nfaces = len(panels)
+        self.nPanels = len(panels)
         self.get_triangle_quad_ids()
 
     def get_triangle_quad_ids(self):
         trianglesIDs = []
         quadranglesIDs = []
-        for iFace, face in enumerate(self.panels):
-            if len(np.unique(face)) == 3:
-                trianglesIDs.append(iFace+1)
-            elif len(np.unique(face)) == 4:
-                quadranglesIDs.append(iFace+1)
+        for iPanel, panel in enumerate(self.panels):
+            if len(np.unique(panel)) == 3:
+                trianglesIDs.append(iPanel+1)
+            elif len(np.unique(panel)) == 4:
+                quadranglesIDs.append(iPanel+1)
             else:
-                raise ValueError(f'Panel {iFace} has {len(np.unique(face))} unique '
+                raise ValueError(f'Panel {iPanel} has {len(np.unique(panel))} unique '
                                  f'vertices. \n'
                                  f'\tOnly triangular and quadrilateral panels '
                                  f'are currently supported. \n')
         self.trianglesIDs = trianglesIDs
         self.quadranglesIDs = quadranglesIDs
 
-    # def compute_mesh_properties():
-    #     faces_normals = np.zeros((self.nf, 3))
-    #     faces_areas = np.zeros(nf)
-    #     faces_centers = np.zeros((self.nfaces, 3))
-
-    #     triangleNormals = np.cross(self.vertices[self.trianglesIDs])self.panels[trianglesIDs] =
-
-    def compute_face_properties(self):
-        '''calculate face normal vectors, areas, centers and radii'''
-        faceUnitNormals = []
-        faceAreas = []
-        faceCenters = []
-        faceRadii = []
-        for iFace, face in enumerate(self.panels):
-            if iFace+1 in self.trianglesIDs:
-                triangleNormal = np.cross(self.vertices[face[1]-1] - self.vertices[face[0]-1],
-                                          self.vertices[face[2]-1] - self.vertices[face[0]-1])
+    def compute_panel_properties(self):
+        '''calculate panel normal vectors, areas, centers and radii'''
+        panelUnitNormals = []
+        panelAreas = []
+        panelCenters = []
+        panelRadii = []
+        print(self.panels)
+        print(self.vertices)
+        # print(f'test1: {self.vertices[self.panels[489][2]]}')
+        for iPanel, panel in enumerate(self.panels):
+            if iPanel+1 in self.trianglesIDs:
+                triangleNormal = np.cross(self.vertices[panel[1]-1] - self.vertices[panel[0]-1],
+                                          self.vertices[panel[2]-1] - self.vertices[panel[0]-1])
                 triangleNormalMag = np.linalg.norm(triangleNormal)
                 triangleUnitNormal = triangleNormal / triangleNormalMag
                 triangleArea = 0.5 * triangleNormalMag
-                triangleCenter = np.sum(self.vertices[face[0:3]])/3
-                triangleRadius = np.max([np.abs(self.vertices[face[0]-1] - triangleCenter),
-                                         np.abs(self.vertices[face[1]-1] - triangleCenter),
-                                         np.abs(self.vertices[face[2]-1] - triangleCenter)])
-                faceUnitNormals.append(triangleUnitNormal)
-                faceAreas.append(triangleArea)
-                faceCenters.append(triangleCenter)
-                faceRadii.append(triangleRadius)
-            elif iFace+1 in self.quadranglesIDs:
-                quadNormal = np.cross(self.vertices[face[2]-1] - self.vertices[face[0]-1],
-                                      self.vertices[face[3]-1] - self.vertices[face[1]-1])
+                #print(iPanel)
+                triangleCenter = (self.vertices[panel[0]-1] + self.vertices[panel[1]-1] + self.vertices[panel[2]-1])/3.0
+                #triangleCenter = np.sum(self.vertices[panel[0:3]])/3.0
+                triangleRadius = np.max([np.abs(self.vertices[panel[0]-1] - triangleCenter),
+                                         np.abs(self.vertices[panel[1]-1] - triangleCenter),
+                                         np.abs(self.vertices[panel[2]-1] - triangleCenter)])
+                panelUnitNormals.append(triangleUnitNormal)
+                panelAreas.append(triangleArea)
+                panelCenters.append(triangleCenter)
+                panelRadii.append(triangleRadius)
+            elif iPanel+1 in self.quadranglesIDs:
+                quadNormal = np.cross(self.vertices[panel[2]-1] - self.vertices[panel[0]-1],
+                                      self.vertices[panel[3]-1] - self.vertices[panel[1]-1])
                 quadNormalMag = np.linalg.norm(quadNormal)
                 quadUnitNormal = quadNormal / quadNormalMag
                 quadArea = quadNormalMag * 0.5
 
-                quadTri1Center = np.sum(self.vertices[face[[0,1,2]]])/3
-                quadTri2Center = np.sum(self.vertices[face[[0,2,3]]])/3
-                quadTri3Center = np.sum(self.vertices[face[[0,1,3]]])/3
-                quadTri4Center = np.sum(self.vertices[face[[1,2,3]]])/3
+                quadTri1Center = np.sum(self.vertices[panel[[0,1,2]]])/3
+                quadTri2Center = np.sum(self.vertices[panel[[0,2,3]]])/3
+                quadTri3Center = np.sum(self.vertices[panel[[0,1,3]]])/3
+                quadTri4Center = np.sum(self.vertices[panel[[1,2,3]]])/3
 
                 # intersection method:
                 # https://mathworld.wolfram.com/Line-LineIntersection.html 
@@ -95,30 +93,32 @@ class Mesh():
                 x = x1 + a*(np.dot(np.cross(c, b), np.cross(a, b)) /
                             (np.linalg.norm(np.cross(a, b))**2))
                 quadCenter = x
-                quadRadius = np.max([np.abs(self.vertices[face[0]-1] - quadCenter),
-                                     np.abs(self.vertices[face[1]-1] - quadCenter),
-                                     np.abs(self.vertices[face[2]-1] - quadCenter),
-                                     np.abs(self.vertices[face[3]-1] - quadCenter)])
-                faceCenters.append(quadCenter)
-                faceUnitNormals.append(quadUnitNormal)
-                faceAreas.append(quadArea)
-                faceRadii.append(quadRadius)
+                quadRadius = np.max([np.abs(self.vertices[panel[0]-1] - quadCenter),
+                                     np.abs(self.vertices[panel[1]-1] - quadCenter),
+                                     np.abs(self.vertices[panel[2]-1] - quadCenter),
+                                     np.abs(self.vertices[panel[3]-1] - quadCenter)])
+                panelCenters.append(quadCenter)
+                panelUnitNormals.append(quadUnitNormal)
+                panelAreas.append(quadArea)
+                panelRadii.append(quadRadius)
             else:
-                print(f'iFace : {iFace}')
-                print(f'face : {face}')
+                print(f'iPanel : {iPanel}')
+                print(f'panel : {panel}')
                 print(f'self.trianglesIDs : {self.trianglesIDs}')
-                raise ValueError(f'Panel {iFace} has {len(np.unique(face))} unique '
+                raise ValueError(f'Panel {iPanel} has {len(np.unique(panel))} unique '
                                  f'vertices. \n'
                                  f'\tOnly triangular and quadrilateral panels '
                                  f'are currently supported. \n')
-        self.faceUnitNormals = faceUnitNormals
-        self.faceAreas = faceAreas
+        self.panelCenters = panelCenters
+        self.panelUnitNormals = panelUnitNormals
+        self.panelAreas = panelAreas
+        self.panelRadii = panelRadii
 
-    def compute_faces_radiuses(self):
+    def compute_panel_radii(self):
         '''calculate panel radii: defined as distance between panel center and
         furthest vertex'''
 
-        self.faces_radiuses = faces_radiuses
+        # self.panelRadii = panelRadii
 
     # Capytaine approach:
     # https://github.com/mancellin/capytaine/blob/4fb70c71bd791272cca548a4ea0c92b24a49622f/capytaine/meshes/properties.py#L12
