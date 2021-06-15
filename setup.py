@@ -2,37 +2,37 @@
 # coding: utf-8
 
 import os
-from numpy.distutils.core import Extension
-from setuptools import setup
+from numpy.distutils.core import Extension, setup
+# from setuptools import setup
 
 ########################
 #  Fortran extensions  #
 ########################
 
-# Delhommeau_source = [
-#         "libDelhommeau/green_functions/Delhommeau_f90/constants.f90",
-#         "libDelhommeau/green_functions/Delhommeau_f90/old_Prony_decomposition.f90",
-#         "libDelhommeau/green_functions/Delhommeau_f90/Green_Rankine.f90",
-#         "libDelhommeau/green_functions/Delhommeau_f90/Initialize_Green_wave.f90",
-#         "libDelhommeau/green_functions/Delhommeau_f90/Green_wave.f90",
-#         "libDelhommeau/green_functions/Delhommeau_f90/matrices.f90",
-#     ]
+Delhommeau_source = [
+        "litebem/green_functions/Delhommeau_f90/constants.f90",
+        "litebem/green_functions/Delhommeau_f90/old_Prony_decomposition.f90",
+        "litebem/green_functions/Delhommeau_f90/Green_Rankine.f90",
+        "litebem/green_functions/Delhommeau_f90/Initialize_Green_wave.f90",
+        "litebem/green_functions/Delhommeau_f90/Green_wave.f90",
+        "litebem/green_functions/Delhommeau_f90/matrices.f90",
+    ]
 
-# Delhommeau_extension = Extension(
-#     name="libDelhommeau.green_functions.Delhommeau_f90",
-#     sources=Delhommeau_source,
-#     extra_compile_args=['-O2', '-fopenmp', '-cpp'],
-#     extra_f90_compile_args=['-O2', '-fopenmp', '-cpp'],
-#     extra_link_args=['-fopenmp'],
-#     # Uncomment the following lines to get more verbose output from f2py.
-#     define_macros=[
-#         ('F2PY_REPORT_ATEXIT', 1),
-#         ('F2PY_REPORT_ON_ARRAY_COPY', 1),
-#     ],
-# )
+Delhommeau_extension = Extension(
+    name="litebem.green_functions.Delhommeau_f90",
+    sources=Delhommeau_source,
+    extra_compile_args=['-O2', '-fopenmp', '-cpp'],
+    extra_f90_compile_args=['-O2', '-fopenmp', '-cpp'],
+    extra_link_args=['-fopenmp'],
+    # # Uncomment the following lines to get more verbose output from f2py.
+    # define_macros=[
+        # ('F2PY_REPORT_ATEXIT', 1),
+        # ('F2PY_REPORT_ON_ARRAY_COPY', 1),
+    # ],
+)
 
 # XieDelhommeau_extension = Extension(
-#     name="libDelhommeau.green_functions.XieDelhommeau_f90",
+#     name="litebem.green_functions.XieDelhommeau_f90",
 #     sources=Delhommeau_source,
 #     extra_compile_args=['-O2', '-fopenmp', '-cpp', '-DXIE_CORRECTION'],
 #     extra_f90_compile_args=['-O2', '-fopenmp', '-cpp', '-DXIE_CORRECTION'],
@@ -66,12 +66,12 @@ if __name__ == "__main__":
           author = 'David Ogden',
           license = 'Apache-2.0',
           url = 'https://github.com/dav-og/liteBEM',
-          packages = ['litebem'], # 'libDelhommeau', 'libDelhommeau.green_functions'],
-          install_requires = ['pytest']#'numpy', 'scipy'], # 'pandas', 'xarray'
+          packages = ['litebem', 'litebem.preprocessor', 'litebem.solver', 'litebem.postprocessor', 'litebem.green_functions'], # 'libDelhommeau', 'libDelhommeau.green_functions'],
+          install_requires = ['pytest', 'numpy', 'scipy'], # 'pandas', 'xarray'
           # entry_points={
           #     'console_scripts': [
           #         'capytaine=capytaine.ui.cli:main',
           #     ],
           # },
-          # ext_modules=[Delhommeau_extension, XieDelhommeau_extension],
+          ext_modules=[Delhommeau_extension],# XieDelhommeau_extension],
           )
