@@ -1,0 +1,9 @@
+{
+    "python.pythonPath": "C:\\Users\\dlambert\\Miniconda3\\envs\\liteBemDev\\python.exe",
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "tests"
+    ]
+}
