@@ -22,17 +22,17 @@ hemi360Radii = f'./data/hemisphere360PanelRadii.txt'
 
 def test_read_nemoh_mesh_nfaces():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     assert mesh.nPanels == 360
 
 def test_read_nemoh_mesh_ntriangles():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     assert len(mesh.trianglesIDs) == 36
 
 def test_read_nemoh_mesh_nquads():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     assert len(mesh.quadranglesIDs) == 324
 
 
@@ -40,31 +40,31 @@ def test_read_nemoh_mesh_nquads():
 
 def test_compute_panel_properties_normals():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     mesh.compute_panel_properties()
     assert len(mesh.panelUnitNormals) == 360
 
 def test_compute_panel_properties_centers():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     mesh.compute_panel_properties()
     assert len(mesh.panelCenters) == 360
 
 def test_compute_panel_properties_areas():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     mesh.compute_panel_properties()
     assert len(mesh.panelAreas) == 360
 
 def test_compute_panel_properties_radii():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     mesh.compute_panel_properties()
     assert len(mesh.panelRadii) == 360
 
 def test_panel_normal_values():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     mesh.compute_panel_properties()
 
     valuesCap = open(hemi360Normals)
@@ -86,7 +86,7 @@ def test_panel_normal_values():
 
 def test_panel_area_values():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     mesh.compute_panel_properties()
 
     valuesCap = open(hemi360Areas)
@@ -102,7 +102,7 @@ def test_panel_area_values():
 
 def test_panel_centers():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     mesh.compute_panel_properties()
 
     valuesCap = open(hemi360Centers)
@@ -124,7 +124,7 @@ def test_panel_centers():
 
 def test_panel_radii():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
-    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'boatMesh')
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     mesh.compute_panel_properties()
 
     valuesCap = open(hemi360Radii)

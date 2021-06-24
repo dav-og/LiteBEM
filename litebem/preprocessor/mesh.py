@@ -1,17 +1,14 @@
 import numpy as np
-from collections import Counter
-
-from itertools import count
 
 class Mesh():
     """Mesh class
 
     Parameters
     ----------
-    vertices : array_like of shape (nv, 3)
+    vertices : array_like of shape (nVertices, 3)
         Array of mesh vertices coordinates. Each line of the array represents one vertex
         coordinates
-    panels : array_like of shape (nf, 4)
+    panels : array_like of shape (nPanels, 4)
         Arrays of mesh connectivities for panels. Each line of the array represents indices of
         vertices that form the panel, expressed in counterclockwise order to ensure outward normals
         description.
@@ -24,8 +21,23 @@ class Mesh():
         self.panels = panels
         self.nPanels = len(panels)
         self.get_triangle_quad_ids()
+        self.compute_panel_properties()
 
     def get_triangle_quad_ids(self):
+        '''
+        identify which panels are quadrilateral and which are triangles
+
+        Notes
+        -----
+        - this function is called upon instantiation of the Mesh class
+        - this function will identify if any panels have the same vertex listed
+          twice
+        - TODO: compute_panel_properties() expects the first and last vertex to
+          be the same for triangular panels; we could improve the robustness by
+          identifying which vertices are the same and modifying the vector
+          expressions accordingly
+        '''
+
         trianglesIDs = []
         quadranglesIDs = []
         for iPanel, panel in enumerate(self.panels):
@@ -42,14 +54,24 @@ class Mesh():
         self.quadranglesIDs = quadranglesIDs
 
     def compute_panel_properties(self):
-        '''calculate panel normal vectors, areas, centers and radii'''
+        '''
+        calculate panel normal vectors, areas, centers and radii
+
+        Notes
+        -----
+        - this function is called upon instantiation of the Mesh class
+        - several vector expressions are implemented to create class attributes
+          for the panel normals, areas, centers and radii
+        - TODO: create separate functions for th different vector operations to
+          shorten this particular function
+        - TODO: add warning/error for triangular panels that are not defined by
+          repeating vertices 1 and 4
+        '''
+
         panelUnitNormals = []
         panelAreas = []
         panelCenters = []
         panelRadii = []
-        # print(self.panels)
-        # print(self.vertices)
-        # print(f'test1: {self.vertices[self.panels[489][2]]}')
         for iPanel, panel in enumerate(self.panels):
             if iPanel+1 in self.trianglesIDs:
                 triangleNormal = np.cross(self.vertices[panel[1]-1] - self.vertices[panel[0]-1],
@@ -58,12 +80,11 @@ class Mesh():
                 triangleUnitNormal = triangleNormal / triangleNormalMag
                 triangleArea = 0.5 * triangleNormalMag
                 triangleCenter = (self.vertices[panel[0]-1] + self.vertices[panel[1]-1] + self.vertices[panel[2]-1])/3.0
-                #triangleCenter = np.sum(self.vertices[panel[0:3]])/3.0
 
                 panelVertices = [self.vertices[panel[0]-1], self.vertices[panel[1]-1],
-                                 self.vertices[panel[2]-1]]                
+                                 self.vertices[panel[2]-1]]
                 radiiMag = []
-                
+
                 for coord in panelVertices:
                     radiiVector = coord-triangleCenter
                     radiiMag.append(np.linalg.norm(radiiVector))
@@ -83,54 +104,25 @@ class Mesh():
                 quadArea = quadNormalMag * 0.5
 
                 # area calculation
-
                 a1 = np.linalg.norm(np.cross(self.vertices[panel[1]-1] - self.vertices[panel[0]-1],
                                              self.vertices[panel[2]-1] - self.vertices[panel[0]-1]))*0.5
-                
                 a2 = np.linalg.norm(np.cross(self.vertices[panel[3]-1] - self.vertices[panel[0]-1],
                                              self.vertices[panel[2]-1] - self.vertices[panel[0]-1]))*0.5
-
                 quadArea = a1 + a2
 
                 # center calculation
-
                 c1 = (self.vertices[panel[0]-1] + self.vertices[panel[1]-1] + self.vertices[panel[2]-1])/3.0
                 c2 = (self.vertices[panel[0]-1] + self.vertices[panel[2]-1] + self.vertices[panel[3]-1])/3.0
-
                 quadCenter = (a1*c1 + a2*c2)/(quadArea)
 
                 # radius calculation
-
                 panelVertices = [self.vertices[panel[0]-1], self.vertices[panel[1]-1],
                                  self.vertices[panel[2]-1], self.vertices[panel[3]-1]]
-                
                 radiiMag = []
-                
                 for coord in panelVertices:
                     radiiVector = coord-quadCenter
                     radiiMag.append(np.linalg.norm(radiiVector))
-
                 quadRadius = max(radiiMag)
-
-                # quadTri1Center = np.sum(self.vertices[panel[[0,1,2]]])/3
-                # quadTri2Center = np.sum(self.vertices[panel[[0,2,3]]])/3
-                # quadTri3Center = np.sum(self.vertices[panel[[0,1,3]]])/3
-                # quadTri4Center = np.sum(self.vertices[panel[[1,2,3]]])/3
-
-                # # intersection method:
-                # # https://mathworld.wolfram.com/Line-LineIntersection.html 
-                # x1 = quadTri1Center
-                # x2 = quadTri2Center
-                # x3 = quadTri3Center
-                # x4 = quadTri4Center
-
-                # a = x2 - x1
-                # b = x4 - x3
-                # c = x3 - x1
-
-                # x = x1 + a*(np.dot(np.cross(c, b), np.cross(a, b)) /
-                #             (np.linalg.norm(np.cross(a, b))**2))
-                # quadCenter = x
 
                 panelCenters.append(quadCenter)
                 panelUnitNormals.append(quadUnitNormal)
@@ -145,24 +137,10 @@ class Mesh():
                                  f'\tOnly triangular and quadrilateral panels '
                                  f'are currently supported. \n')
 
-        self.panelCenters = panelCenters
-        self.panelUnitNormals = panelUnitNormals
         self.panelAreas = panelAreas
+        self.panelCenters = panelCenters
         self.panelRadii = panelRadii
-
-    def compute_panel_radii(self):
-        '''calculate panel radii: defined as distance between panel center and
-        furthest vertex'''
-
-        
-
-        # self.panelRadii = panelRadii
-
-    # Capytaine approach:
-    # https://github.com/mancellin/capytaine/blob/4fb70c71bd791272cca548a4ea0c92b24a49622f/capytaine/meshes/properties.py#L12
-    # NEMOH approach:
-    # https://github.com/LHEEA/Nemoh/blob/49393be96bd590e267bfbc16347b665cda0edeb8/preProcessor/Mesh.f90#L207
-
+        self.panelUnitNormals = panelUnitNormals
 
 def read_nemoh_mesh(pathToMesh):#
     '''

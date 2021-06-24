@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # Misc
-noodling.py
 .vscode/*
+tests/noodling/*
