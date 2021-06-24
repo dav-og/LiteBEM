@@ -47,8 +47,8 @@ class Mesh():
         panelAreas = []
         panelCenters = []
         panelRadii = []
-        print(self.panels)
-        print(self.vertices)
+        # print(self.panels)
+        # print(self.vertices)
         # print(f'test1: {self.vertices[self.panels[489][2]]}')
         for iPanel, panel in enumerate(self.panels):
             if iPanel+1 in self.trianglesIDs:
@@ -57,16 +57,24 @@ class Mesh():
                 triangleNormalMag = np.linalg.norm(triangleNormal)
                 triangleUnitNormal = triangleNormal / triangleNormalMag
                 triangleArea = 0.5 * triangleNormalMag
-                #print(iPanel)
                 triangleCenter = (self.vertices[panel[0]-1] + self.vertices[panel[1]-1] + self.vertices[panel[2]-1])/3.0
                 #triangleCenter = np.sum(self.vertices[panel[0:3]])/3.0
-                triangleRadius = np.max([np.abs(self.vertices[panel[0]-1] - triangleCenter),
-                                         np.abs(self.vertices[panel[1]-1] - triangleCenter),
-                                         np.abs(self.vertices[panel[2]-1] - triangleCenter)])
+
+                panelVertices = [self.vertices[panel[0]-1], self.vertices[panel[1]-1],
+                                 self.vertices[panel[2]-1]]                
+                radiiMag = []
+                
+                for coord in panelVertices:
+                    radiiVector = coord-triangleCenter
+                    radiiMag.append(np.linalg.norm(radiiVector))
+
+                triangleRadius = max(radiiMag)
+
                 panelUnitNormals.append(triangleUnitNormal)
                 panelAreas.append(triangleArea)
                 panelCenters.append(triangleCenter)
                 panelRadii.append(triangleRadius)
+
             elif iPanel+1 in self.quadranglesIDs:
                 quadNormal = np.cross(self.vertices[panel[2]-1] - self.vertices[panel[0]-1],
                                       self.vertices[panel[3]-1] - self.vertices[panel[1]-1])
@@ -74,29 +82,56 @@ class Mesh():
                 quadUnitNormal = quadNormal / quadNormalMag
                 quadArea = quadNormalMag * 0.5
 
-                quadTri1Center = np.sum(self.vertices[panel[[0,1,2]]])/3
-                quadTri2Center = np.sum(self.vertices[panel[[0,2,3]]])/3
-                quadTri3Center = np.sum(self.vertices[panel[[0,1,3]]])/3
-                quadTri4Center = np.sum(self.vertices[panel[[1,2,3]]])/3
+                # area calculation
 
-                # intersection method:
-                # https://mathworld.wolfram.com/Line-LineIntersection.html 
-                x1 = quadTri1Center
-                x2 = quadTri2Center
-                x3 = quadTri3Center
-                x4 = quadTri4Center
+                a1 = np.linalg.norm(np.cross(self.vertices[panel[1]-1] - self.vertices[panel[0]-1],
+                                             self.vertices[panel[2]-1] - self.vertices[panel[0]-1]))*0.5
+                
+                a2 = np.linalg.norm(np.cross(self.vertices[panel[3]-1] - self.vertices[panel[0]-1],
+                                             self.vertices[panel[2]-1] - self.vertices[panel[0]-1]))*0.5
 
-                a = x2 - x1
-                b = x4 - x3
-                c = x3 - x1
+                quadArea = a1 + a2
 
-                x = x1 + a*(np.dot(np.cross(c, b), np.cross(a, b)) /
-                            (np.linalg.norm(np.cross(a, b))**2))
-                quadCenter = x
-                quadRadius = np.max([np.abs(self.vertices[panel[0]-1] - quadCenter),
-                                     np.abs(self.vertices[panel[1]-1] - quadCenter),
-                                     np.abs(self.vertices[panel[2]-1] - quadCenter),
-                                     np.abs(self.vertices[panel[3]-1] - quadCenter)])
+                # center calculation
+
+                c1 = (self.vertices[panel[0]-1] + self.vertices[panel[1]-1] + self.vertices[panel[2]-1])/3.0
+                c2 = (self.vertices[panel[0]-1] + self.vertices[panel[2]-1] + self.vertices[panel[3]-1])/3.0
+
+                quadCenter = (a1*c1 + a2*c2)/(quadArea)
+
+                # radius calculation
+
+                panelVertices = [self.vertices[panel[0]-1], self.vertices[panel[1]-1],
+                                 self.vertices[panel[2]-1], self.vertices[panel[3]-1]]
+                
+                radiiMag = []
+                
+                for coord in panelVertices:
+                    radiiVector = coord-quadCenter
+                    radiiMag.append(np.linalg.norm(radiiVector))
+
+                quadRadius = max(radiiMag)
+
+                # quadTri1Center = np.sum(self.vertices[panel[[0,1,2]]])/3
+                # quadTri2Center = np.sum(self.vertices[panel[[0,2,3]]])/3
+                # quadTri3Center = np.sum(self.vertices[panel[[0,1,3]]])/3
+                # quadTri4Center = np.sum(self.vertices[panel[[1,2,3]]])/3
+
+                # # intersection method:
+                # # https://mathworld.wolfram.com/Line-LineIntersection.html 
+                # x1 = quadTri1Center
+                # x2 = quadTri2Center
+                # x3 = quadTri3Center
+                # x4 = quadTri4Center
+
+                # a = x2 - x1
+                # b = x4 - x3
+                # c = x3 - x1
+
+                # x = x1 + a*(np.dot(np.cross(c, b), np.cross(a, b)) /
+                #             (np.linalg.norm(np.cross(a, b))**2))
+                # quadCenter = x
+
                 panelCenters.append(quadCenter)
                 panelUnitNormals.append(quadUnitNormal)
                 panelAreas.append(quadArea)
@@ -109,6 +144,7 @@ class Mesh():
                                  f'vertices. \n'
                                  f'\tOnly triangular and quadrilateral panels '
                                  f'are currently supported. \n')
+
         self.panelCenters = panelCenters
         self.panelUnitNormals = panelUnitNormals
         self.panelAreas = panelAreas
@@ -117,6 +153,8 @@ class Mesh():
     def compute_panel_radii(self):
         '''calculate panel radii: defined as distance between panel center and
         furthest vertex'''
+
+        
 
         # self.panelRadii = panelRadii
 
