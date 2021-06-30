@@ -18,11 +18,11 @@
 # -- Project information -----------------------------------------------------
 
 project = 'LiteBEM'
-copyright = '2021, Dr. David Ogden'
-author = 'Dr. David Ogden'
+# copyright = ' '
+author = 'dav-og, dunc-lamb'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.0'
+release = '0.1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -52,7 +52,7 @@ myst_enable_extensions = [
 # a list of builtin themes.
 #
 html_theme = 'sphinx_book_theme'
-html_title = f"LiteBEM v0.0.0"
+html_title = f"LiteBEM v0.1"
 html_theme_options = {
     "github_url": "https://github.com/dav-og/LiteBEM",
     "repository_url": "https://github.com/dav-og/LiteBEM",
