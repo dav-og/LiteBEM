@@ -101,7 +101,6 @@ class Mesh():
                                       self.vertices[panel[3]-1] - self.vertices[panel[1]-1])
                 quadNormalMag = np.linalg.norm(quadNormal)
                 quadUnitNormal = quadNormal / quadNormalMag
-                quadArea = quadNormalMag * 0.5
 
                 # area calculation
                 a1 = np.linalg.norm(np.cross(self.vertices[panel[1]-1] - self.vertices[panel[0]-1],
@@ -110,7 +109,8 @@ class Mesh():
                                              self.vertices[panel[2]-1] - self.vertices[panel[0]-1]))*0.5
                 quadArea = a1 + a2
 
-                # center calculation
+                # center calculation 
+                # TODO: check different method for calculation
                 c1 = (self.vertices[panel[0]-1] + self.vertices[panel[1]-1] + self.vertices[panel[2]-1])/3.0
                 c2 = (self.vertices[panel[0]-1] + self.vertices[panel[2]-1] + self.vertices[panel[3]-1])/3.0
                 quadCenter = (a1*c1 + a2*c2)/(quadArea)
