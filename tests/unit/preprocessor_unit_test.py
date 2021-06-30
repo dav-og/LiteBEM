@@ -1,12 +1,6 @@
 import pytest
 import numpy as np
 import litebem.preprocessor.mesh as lpm
-#import libDelhommeau.solver.bem_solver as bs
-#from libDelhommeau.green_functions.delhommeau import Delhommeau
-#from libDelhommeau.pre_processor.bem_problem_definitions import RadiationProblem
-# from libDelhommeau.pre_processor.bodies import Body
-# from libDelhommeau.pre_processor.mesh import read_nemoh_mesh, Mesh
-
 
 # reference data
 

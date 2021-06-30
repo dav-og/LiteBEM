@@ -11,9 +11,9 @@ import numpy as np
 
 # from capytaine.tools.prony_decomposition import exponential_decomposition, error_exponential_decomposition
 
-from libDelhommeau.green_functions.abstract_green_function import AbstractGreenFunction
-import libDelhommeau.green_functions.Delhommeau_f90 as Delhommeau_f90
-import libDelhommeau.green_functions.XieDelhommeau_f90 as XieDelhommeau_f90
+from litebem.green_functions.abstract_green_function import AbstractGreenFunction
+import litebem.green_functions.delhommeau_f90 as delhommeau_f90
+#import litebem.green_functions.XieDelhommeau_f90 as XieDelhommeau_f90
 
 LOG = logging.getLogger(__name__)
 
@@ -37,9 +37,9 @@ class Delhommeau(AbstractGreenFunction):
         Tabulated integrals for the computation of the Green function.
     """
 
-    fortran_core = Delhommeau_f90
+    fortran_core = delhommeau_f90
 
-    build_tabulated_integrals = lru_cache(maxsize=1)(Delhommeau_f90.initialize_green_wave.initialize_tabulated_integrals)
+    build_tabulated_integrals = lru_cache(maxsize=1)(delhommeau_f90.initialize_green_wave.initialize_tabulated_integrals)
 
     def __init__(self, *,
                  tabulation_nb_integration_points=251,
@@ -95,7 +95,7 @@ class Delhommeau(AbstractGreenFunction):
             # The function that will be approximated.
             @np.vectorize
             def f(x):
-                return Delhommeau_f90.initialize_green_wave.ff(x, dimensionless_omega, dimensionless_wavenumber)
+                return delhommeau_f90.initialize_green_wave.ff(x, dimensionless_omega, dimensionless_wavenumber)
 
             # Try different increasing number of exponentials
             for n_exp in range(4, 31, 2):
@@ -115,7 +115,7 @@ class Delhommeau(AbstractGreenFunction):
                             dimensionless_omega, dimensionless_wavenumber)
 
         elif self.finite_depth_prony_decomposition_method.lower() == 'fortran':
-            lamda, a, nexp = Delhommeau_f90.old_prony_decomposition.lisc(dimensionless_omega, dimensionless_wavenumber)
+            lamda, a, nexp = delhommeau_f90.old_prony_decomposition.lisc(dimensionless_omega, dimensionless_wavenumber)
             lamda = lamda[:nexp]
             a = a[:nexp]
 
