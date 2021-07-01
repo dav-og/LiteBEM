@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'LiteBEM'
-# copyright = ' '
-author = 'dav-og, dunc-lamb'
+copyright = 'NREL & SNL'
+author = 'dav-og, dunc-lamb, mancellin'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1'
