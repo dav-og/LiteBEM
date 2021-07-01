@@ -4,18 +4,23 @@
    contain the root `toctree` directive.
 
 
-LiteBEM - open source Boundary Element Method solver
+LiteBEM
 ===================================
+https://github.com/dav-og/LiteBEM
 
 .. image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
    :target: https://opensource.org/licenses/Apache-2.0
+
+.. image:: ./images/lblogo.png
+
+
 
 
 Introduction
 ------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Introduction
 
    introduction/overview
@@ -28,7 +33,7 @@ Theory
 ------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Theory
 
    theory/meshes
@@ -43,7 +48,7 @@ Using LiteBEM
 -------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Using LiteBEM
 
    users/workflow
@@ -51,11 +56,13 @@ Using LiteBEM
    users/examples
 
 
-Additional Documentation
-------------------------
+LiteBEM Development
+-------------------
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Additional Documentation
+   :maxdepth: 1
+   :caption: Development
 
-   additional/testing
+   development/testing
+   development/api
+   development/contributing

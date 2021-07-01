@@ -1,6 +1,5 @@
 # Meshes
 
-## Sections
 - [The Nemoh mesh format](##the-nemoh-mesh-format)
 - [Calculating panel properties](##calculating-panel-properties)
 
