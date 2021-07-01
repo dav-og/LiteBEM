@@ -3,44 +3,59 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+
 LiteBEM - open source Boundary Element Method solver
 ===================================
 
 .. image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
    :target: https://opensource.org/licenses/Apache-2.0
 
-Overview
---------
-Description of LiteBEM...
 
-Timeline of BEM Solver Development
-----------------------------------
-Description of the timeline of BEM development leading up to LiteBEM...
-
-.. image:: images/timelineBEM.png
-
-LiteBEM Structure
------------------
-Description of LiteBEM's structure
-
-.. image:: images/structureBEM.png
-
-Welcome
--------
+Introduction
+------------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Getting Started
+   :caption: Introduction
 
-   install
+   introduction/overview
+   introduction/gettingstarted
+   introduction/history
+   introduction/acknowledgements
 
-Code Documentation
-------------------
+
+Theory
+------
 
 .. toctree::
    :maxdepth: 2
-   :caption: LiteBEM
+   :caption: Theory
 
-   preprocessor/index
-   solver/index
-   postprocessor/index
+   theory/meshes
+   theory/hydrostatics
+   theory/potentialflow
+   theory/greenstheorem
+   theory/linearsolver
+   theory/irfs
+
+
+Using LiteBEM
+-------------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Using LiteBEM
+
+   users/workflow
+   users/postprocessing
+   users/examples
+
+
+Additional Documentation
+------------------------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Additional Documentation
+
+   additional/testing

@@ -1,4 +1,4 @@
-# Installation
+# Getting Started
 
 ## Requirements
   - Conda is recommended for managing your Python distribution, dependencies and environment:
