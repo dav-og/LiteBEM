@@ -9,14 +9,14 @@ from numpy.distutils.core import Extension, setup
 #  Fortran extensions  #
 ########################
 
-delhommeauSources = ["litebem/green_functions/delhommeau_f90/constants.f90",
-                     "litebem/green_functions/delhommeau_f90/old_Prony_decomposition.f90",
-                     "litebem/green_functions/delhommeau_f90/Green_Rankine.f90",
-                     "litebem/green_functions/delhommeau_f90/Initialize_Green_wave.f90",
-                     "litebem/green_functions/delhommeau_f90/Green_wave.f90",
-                     "litebem/green_functions/delhommeau_f90/matrices.f90"]
+delhommeauSources = ["litebem/solver/green_functions/delhommeau_f90/constants.f90",
+                     "litebem/solver/green_functions/delhommeau_f90/old_Prony_decomposition.f90",
+                     "litebem/solver/green_functions/delhommeau_f90/Green_Rankine.f90",
+                     "litebem/solver/green_functions/delhommeau_f90/Initialize_Green_wave.f90",
+                     "litebem/solver/green_functions/delhommeau_f90/Green_wave.f90",
+                     "litebem/solver/green_functions/delhommeau_f90/matrices.f90"]
 
-delhommeauExtension = Extension(name="litebem.green_functions.delhommeau_f90",
+delhommeauExtension = Extension(name="litebem.solver.green_functions.delhommeau_f90",
                                 sources=delhommeauSources,
                                 extra_compile_args=['-O2', '-cpp'],#, '-fopenmp', '-fpp'],
                                 extra_f90_compile_args=['-O2', '-cpp'],#, '-fopenmp', '-fpp'],
@@ -61,7 +61,7 @@ if __name__ == "__main__":
           author = 'mancellin, dav-og, dunc-lamb',
           license = 'Apache-2.0',
           url = 'https://github.com/dav-og/liteBEM',
-          packages = ['litebem', 'litebem.preprocessor', 'litebem.solver', 'litebem.postprocessor', 'litebem.green_functions'],
+          packages = ['litebem', 'litebem.preprocessor', 'litebem.solver', 'litebem.postprocessor', 'litebem.solver.green_functions'],
           # install_requires = ['pytest', 'numpy', 'scipy'], # 'pandas', 'xarray'
           # entry_points={
           #     'console_scripts': [
