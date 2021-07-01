@@ -16,8 +16,8 @@ https://github.com/dav-og/LiteBEM
 
 
 
-Introduction
-------------
+Welcome
+-------
 
 .. toctree::
    :maxdepth: 1
@@ -29,8 +29,8 @@ Introduction
    introduction/acknowledgements
 
 
-Theory
-------
+Background Theory
+-----------------
 
 .. toctree::
    :maxdepth: 1
@@ -44,8 +44,8 @@ Theory
    theory/irfs
 
 
-Using LiteBEM
--------------
+How to use LiteBEM
+------------------
 
 .. toctree::
    :maxdepth: 1
