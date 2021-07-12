@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-import litebem.preprocessor.mesh as lpm
+import litebem.preprocessing.mesh as lpm
 
 # reference data
 
@@ -130,6 +130,21 @@ def test_panel_radii():
 
     for i in range(len(valuesCapList)):
         assert round(valuesCapList[i],13) == round(mesh.panelRadii[i],13)
+
+# tests for compute_polygons function
+
+def test_polygon_length():
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
+    mesh.construct_polygons()
+    assert len(mesh.polygons) == 37
+
+# tests for waterplane_area function
+
+def test_waterplane_area():
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
+    round(mesh.waterplaneArea,1) == 3.1
 
 # TODO: create Body object in pre_processor.mesh that can be passed to
 # RadiationProblem as an argument

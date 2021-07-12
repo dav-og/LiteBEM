@@ -1,3 +1,4 @@
+from os import path
 import numpy as np
 
 class Mesh():
@@ -22,6 +23,8 @@ class Mesh():
         self.nPanels = len(panels)
         self.get_triangle_quad_ids()
         self.compute_panel_properties()
+        self.construct_polygons()
+        self.waterplane_area()
 
     def get_triangle_quad_ids(self):
         '''
@@ -141,6 +144,80 @@ class Mesh():
         self.panelCenters = panelCenters
         self.panelRadii = panelRadii
         self.panelUnitNormals = panelUnitNormals
+
+    def waterplane_area(self):
+        '''
+        calculates the waterplane area for the given mesh
+        '''
+
+        sum1 = 0
+        sum2 = 0
+
+        vertices = np.asarray(self.vertices)
+        points = vertices[self.polygons]
+        points = points[:-1,0:2]
+
+        for i in range(len(points)):
+            index2 = (i+1)%len(points)
+            prod = points[i,0]*points[index2,1]
+            sum1 += prod
+
+        for i in range(len(points)):
+            index2 = (i+1)%len(points)
+            prod = points[index2,0]*points[i,1]
+            sum2 += prod
+        
+        self.waterplaneArea = abs(1/2*(sum1-sum2))
+
+    def construct_polygons(self):
+        '''
+        orders the vertices on the cut water plane into a continuous polygon
+        '''
+
+        vertices = np.asarray(self.vertices)
+        panels = np.asarray(self.panels)
+        panels = panels-1
+
+        z = vertices[:,2]
+        
+        vert_on_plane = z == 0
+        has_verts_on = vert_on_plane[panels].sum(axis=1)
+        panel_on_ids = np.nonzero(has_verts_on)
+        panels_on = panels[panel_on_ids[0]]
+
+        panel_verts_on_plane = dict()
+        
+        for i in range(len(panels_on)):
+
+            for j in range(len(panels_on[i])):
+                
+                if vert_on_plane[panels_on[i,j]] == True:
+                    top_left = panels_on[i,j+1]
+                    top_right = panels_on[i,j]
+
+                    panel_verts_on_plane[top_left] = top_right
+
+                    break
+
+        path = list()
+        
+        while True:
+            v_left_init,v_right = panel_verts_on_plane.popitem()
+            path.append(v_left_init)
+            path.append(v_right)
+            v_left_new = v_right
+
+            while True:
+                try:
+                    v_right = panel_verts_on_plane.pop(v_left_new)
+                    path.append(v_right)
+                    v_left_new = v_right
+                except KeyError:
+                    break
+            break
+
+        self.polygons = path
+        
 
 def read_nemoh_mesh(pathToMesh):#
     '''
