@@ -219,6 +219,10 @@ class Mesh():
         self.polygons = path
 
     def compute_volume_CoB(self):
+        '''
+        Calculates the displaced volume and center of buoyancy of the mesh
+        '''
+        
         panels = np.asarray(self.panels)-1
         vertices = np.asarray(self.vertices)
         origin = np.asarray([0,0,0])
