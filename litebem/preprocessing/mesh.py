@@ -180,43 +180,94 @@ class Mesh():
 
         z = vertices[:,2]
         
-        vert_on_plane = z == 0
-        has_verts_on = vert_on_plane[panels].sum(axis=1)
-        panel_on_ids = np.nonzero(has_verts_on)
-        panels_on = panels[panel_on_ids[0]]
+        verticesOnPlane = z == 0
+        panelsOn = verticesOnPlane[panels].sum(axis=1)
+        panelsOnIDs = np.nonzero(panelsOn)
+        panelsOnPlane = panels[panelsOnIDs[0]]
 
-        panel_verts_on_plane = dict()
+        panelPlaneVertices = dict()
         
-        for i in range(len(panels_on)):
+        for i in range(len(panelsOnPlane)):
 
-            for j in range(len(panels_on[i])):
+            for j in range(len(panelsOnPlane[i])):
                 
-                if vert_on_plane[panels_on[i,j]] == True:
-                    top_left = panels_on[i,j+1]
-                    top_right = panels_on[i,j]
+                if verticesOnPlane[panelsOnPlane[i,j]] == True:
+                    topLeft = panelsOnPlane[i,j+1]
+                    topRight = panelsOnPlane[i,j]
 
-                    panel_verts_on_plane[top_left] = top_right
+                    panelPlaneVertices[topLeft] = topRight
 
                     break
 
         path = list()
         
         while True:
-            v_left_init,v_right = panel_verts_on_plane.popitem()
-            path.append(v_left_init)
-            path.append(v_right)
-            v_left_new = v_right
+            vLeftInit,vRight = panelPlaneVertices.popitem()
+            path.append(vLeftInit)
+            path.append(vRight)
+            vLeftNew = vRight
 
             while True:
                 try:
-                    v_right = panel_verts_on_plane.pop(v_left_new)
-                    path.append(v_right)
-                    v_left_new = v_right
+                    vRight = panelPlaneVertices.pop(vLeftNew)
+                    path.append(vRight)
+                    vLeftNew = vRight
                 except KeyError:
                     break
             break
 
         self.polygons = path
+
+    def compute_volume_CoB(self):
+        panels = np.asarray(self.panels)-1
+        vertices = np.asarray(self.vertices)
+        origin = np.asarray([0,0,0])
+        rhoW = 1023
+
+        volumes = list()
+        centroids = list()
+
+        for ipanel,panel in enumerate(panels):
+
+            if ipanel+1 in self.trianglesIDs:
+                vertA = vertices[panel[0]]
+                vertB = vertices[panel[1]]
+                vertC = vertices[panel[2]]
+
+                Vi = np.linalg.det([vertA,vertB,vertC])/6
+                Ci = (vertA + vertB + vertC + origin)/4
+
+                volumes.append(Vi)
+                centroids.append(Ci)
+
+            elif ipanel+1 in self.quadranglesIDs:
+                vertA = vertices[panel[0]]
+                vertB = vertices[panel[1]]
+                vertC = vertices[panel[2]]
+                vertD = vertices[panel[3]]
+
+                Vi1 = np.linalg.det([vertA,vertB,vertC])/6
+                Vi2 = np.linalg.det([vertA,vertC,vertD])/6
+                Ci1 = (vertA + vertB + vertC + origin)/4
+                Ci2 = (vertA + vertC + vertD + origin)/4
+
+                volumes.append(Vi1)
+                volumes.append(Vi2)
+                centroids.append(Ci1)
+                centroids.append(Ci2)
+
+        volumeTotal = sum(volumes)
+        zCentroids = np.asarray(centroids)[:,2]
+
+        sumZb = 0
+
+        for i in range(len(zCentroids)):
+            sumZb += rhoW*volumes[i]*zCentroids[i]
+
+        volumeTotal = sum(volumes)
+        zb = sumZb/(rhoW*volumeTotal)
+
+        return volumeTotal,zb
         
 
 def read_nemoh_mesh(pathToMesh):#

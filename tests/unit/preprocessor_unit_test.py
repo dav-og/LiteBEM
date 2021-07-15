@@ -144,7 +144,16 @@ def test_polygon_length():
 def test_waterplane_area():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
     mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
-    round(mesh.waterplaneArea,1) == 3.1
+    assert round(mesh.waterplaneArea,1) == 3.1
+
+# tests for compute_vol_CoB function
+
+def test_compute_volume_CoB():
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
+    volume,zb = mesh.compute_volume_CoB()
+    assert round(volume,3) == 2.071
+    assert round(zb,3) == -0.374
 
 # TODO: create Body object in pre_processor.mesh that can be passed to
 # RadiationProblem as an argument
