@@ -4,11 +4,11 @@ import litebem.preprocessing.mesh as lpm
 
 # reference data
 
-hemi360Mesh =  f'tests/unit/preprocessorRefData/hemisphere360.nemoh'
-hemi360Areas = f'tests/unit/preprocessorRefData/hemisphere360PanelAreas.txt'
-hemi360Centers = f'tests/unit/preprocessorRefData/hemisphere360PanelCenters.txt'
-hemi360Normals = f'tests/unit/preprocessorRefData/hemisphere360PanelNormals.txt'
-hemi360Radii = f'tests/unit/preprocessorRefData/hemisphere360PanelRadii.txt'
+hemi360Mesh =  f'./preprocessorRefData/hemisphere360.nemoh'
+hemi360Areas = f'./preprocessorRefData/hemisphere360PanelAreas.txt'
+hemi360Centers = f'./preprocessorRefData/hemisphere360PanelCenters.txt'
+hemi360Normals = f'./preprocessorRefData/hemisphere360PanelNormals.txt'
+hemi360Radii = f'./preprocessorRefData/hemisphere360PanelRadii.txt'
 
 
 # tests for reading nemoh mesh
