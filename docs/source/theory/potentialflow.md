@@ -23,7 +23,7 @@ dry water.
 do with real fluids and that it was more to do with solving beautiful mathematical
 problems
 
-Despite the simplications, potential flow theory is incredibly important to WEC
+Despite the simplifications, potential flow theory is incredibly important to WEC
 numerical modelling - enabling the modelling of a wide range of operating
 conditions in a fraction of the time of higher-fidelity approaches such as CFD
 and SPH.
@@ -88,7 +88,7 @@ WEC-Sim).
     \end{equation}
 	$$
 
--   Under these simplifictions, the velocity vector, $\vec{v}(x, y, z, t)$ may
+-   Under these simplifications, the velocity vector, $\vec{v}(x, y, z, t)$ may
     be replaced with a mathematical abstraction: the gradient of a scalar
     potential, $\phi(x, y, z, t)$:
     
