@@ -272,7 +272,80 @@ class Mesh():
         zb = sumZb/(rhoW*volumeTotal)
 
         return volumeTotal,zb
+
+    def compute_hydrostatic_stiffness(self,CoG,volume=True,CoB=True,rhoW=1023,g=9.81):
+        if volume == True:
+            values = self.compute_volume_CoB()
+            volume = values[0]
+            if CoB == True:
+                CoB = values[1]
         
+        moments = self.compute_moments_of_area()
+
+        gmT = moments[2]/volume - (CoG-CoB)
+        gmL = moments[3]/volume - (CoG-CoB)
+
+        K33 = rhoW*g*self.waterplaneArea
+        K34 = rhoW*g*moments[0]
+        K35 = -rhoW*g*moments[1]
+        K44 = rhoW*g*volume*gmT
+        K45 = rhoW*g*moments[4]
+        K55 = rhoW*g*volume*gmL
+
+        stiffnessMatrix = np.array([[0,0,0,0,0,0],
+                                    [0,0,0,0,0,0],
+                                    [0,0,K33,K34,K35,0],
+                                    [0,0,K34,K44,K45,0],
+                                    [0,0,K35,K45,K55,0],
+                                    [0,0,0,0,0,0]])
+
+        stiffnessMatrix[np.fabs(stiffnessMatrix) < 1e-4] = 0
+
+        return stiffnessMatrix
+        
+    def compute_moments_of_area(self):
+        sumSx = 0
+        sumSy = 0
+        sumIx = 0
+        sumIy = 0
+        sumIxy = 0
+
+        vertices = np.asarray(self.vertices)
+        points = vertices[self.polygons]
+        points = points[:-1,0:2]
+
+        moments = list()
+
+        for i in range(len(points)):
+            i2 = (i+1) % len(points)
+
+            termSx = points[i,1] + points[i2,1]
+            termSy = points[i,0] + points[i2,0]
+            termIx = points[i,1]**2 + points[i,1]*points[i2,1] + points[i2,1]**2
+            termIy = points[i,0]**2 + points[i,0]*points[i2,0] + points[i2,0]**2
+            termIxy = points[i,0]*points[i2,1] + 2*points[i,0]*points[i,1] + 2*points[i2,0]*points[i2,1] + points[i2,0]*points[i,1]
+
+            area = points[i,0]*points[i2,1] - points[i2,0]*points[i,1]
+
+            sumSx += termSx*area
+            sumSy += termSy*area
+            sumIx += termIx*area
+            sumIy += termIy*area
+            sumIxy += termIxy*area
+            
+        Sx = (1/6)*sumSx
+        Sy = (1/6)*sumSy
+        Ix = (1/12)*sumIx
+        Iy = (1/12)*sumIy
+        Ixy = (1/24)*sumIxy
+        
+        moments.append(Sx)
+        moments.append(Sy)
+        moments.append(Ix)
+        moments.append(Iy)
+        moments.append(Ixy)
+
+        return moments
 
 def read_nemoh_mesh(pathToMesh):#
     '''

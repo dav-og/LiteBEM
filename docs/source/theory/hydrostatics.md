@@ -66,6 +66,3 @@ $$
 Where $S_0$ is the waterplane area in the static condition. If the planes $xOz$
 and $yOz$ are planes of symmetry, then $\mathbf{K}_{hs}$ is diagonal and $K_{34}
 = K_{35} = K_{45} = 0$.
-
-
-## Waterplane Area
