@@ -4,11 +4,11 @@ import litebem.preprocessing.mesh as lpm
 
 # reference data
 
-hemi360Mesh =  f'./preprocessorRefData/hemisphere360.nemoh'
-hemi360Areas = f'./preprocessorRefData/hemisphere360PanelAreas.txt'
-hemi360Centers = f'./preprocessorRefData/hemisphere360PanelCenters.txt'
-hemi360Normals = f'./preprocessorRefData/hemisphere360PanelNormals.txt'
-hemi360Radii = f'./preprocessorRefData/hemisphere360PanelRadii.txt'
+hemi360Mesh =  f'tests/unit/preprocessorRefData/hemisphere360.nemoh'
+hemi360Areas = f'tests/unit/preprocessorRefData/hemisphere360PanelAreas.txt'
+hemi360Centers = f'tests/unit/preprocessorRefData/hemisphere360PanelCenters.txt'
+hemi360Normals = f'tests/unit/preprocessorRefData/hemisphere360PanelNormals.txt'
+hemi360Radii = f'tests/unit/preprocessorRefData/hemisphere360PanelRadii.txt'
 
 
 # tests for reading nemoh mesh
@@ -154,6 +154,23 @@ def test_compute_volume_CoB():
     volume,zb = mesh.compute_volume_CoB()
     assert round(volume,3) == 2.071
     assert round(zb,3) == -0.374
+
+# tests for compute_moments_of_area
+
+def test_compute_moments_of_area():
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
+    moments = mesh.compute_moments_of_area()
+    assert len(moments) == 5
+
+# tests for compute_hydrostatic_stiffness
+def test_compute_hydrostatic_stiffness():
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
+    stiffnessMatrix = mesh.compute_hydrostatic_stiffness(0)
+    assert round(stiffnessMatrix[2,2],0) == 31368 
+    assert round(stiffnessMatrix[3,3],3) == 24.655 
+    assert round(stiffnessMatrix[4,4],3) == 24.655 
 
 # TODO: create Body object in pre_processor.mesh that can be passed to
 # RadiationProblem as an argument

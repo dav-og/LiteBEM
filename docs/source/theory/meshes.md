@@ -96,11 +96,45 @@ Area = \frac{1}{2}|(\sum_{i=1}^{n-1}{x_{i}y_{i+1}}) + x_{n}y_{1}
         - (\sum_{i=1}^{n-1}{x_{i+1}y_{i}}) + x_{1}y_{n}|
 $$
 
+### Moments of the Waterplane Area
+
+#### First Moment of Area
+
+The first moment of the waterplane area with respect to the x and y axis are used to determine $K_{34}$ and $K_{35}$ (see hydrostatics section). The equation for both of these moments is as follows:
+
+$$
+S_{x} = \int \int_{S_0} y   dS = \frac{1}{6} \sum_{i=1}^{n-1} (y_{i}+y_{i+1})(x_{i}y_{i+1} - x_{i+1}y_{i}) \\
+
+S_{y} = \int \int_{S_0} x   dS = \frac{1}{6} \sum_{i=1}^{n-1} (x_{i}+x_{i+1})(x_{i}y_{i+1} - x_{i+1}y_{i})
+$$
+
+Where $ S_{0} $ is the waterplane area.
+
+#### Second Moment of Area
+
+The second moment of the waterplane area with respect to the x and y axis are used to determine $K_{44}$ and $K_{55}$ (see hydrostatics section). The equation for both of these moments is as follows:
+
+$$
+I_{x} = \int \int_{S_0} y^{2} dS = \frac{1}{12} \sum_{i=1}^{n-1} (y_{i}^{2}+y_{i}y_{i+1}+y_{i+1}^{2})(x_{i}y_{i+1} - x_{i+1}y_{i}) \\
+
+I_{y} = \int \int_{S_0} x^{2} dS = \frac{1}{12} \sum_{i=1}^{n-1} (x_{i}^{2}+x_{i}x_{i+1}+x_{i+1}^{2})(x_{i}y_{i+1} - x_{i+1}y_{i})
+$$
+
+#### Product Moment of Area
+
+Lastly, the product moment of the waterplane area is used to determine $K_{45}$ (see hydrostatics section). The equation for this moment is as follows:
+
+$$
+I_{x} = \int \int_{S_0} xy dS = \frac{1}{24} \sum_{i=1}^{n-1} (x_{i}y_{i+1} + 2x_{i}y_{i} + 2x_{i+1}y_{i+1} + x_{i+1}y_{i})(x_{i}y_{i+1} - x_{i+1}y_{i})
+$$
+
+> **Note** that equations for the waterplane area and moments of the waterplane area require the area in question be a simple polygon. That is a polygon without holes and self intersections.
+
 ### Volume
 
-The driving principle behind calculating the total volume is breaking up the mesh into many tetrahedrons, all with a common point at the origin. Triangular panels create one tetrahedron while quadrangle panels create two tetrahedrons. The total volume is simply the sum of the volumes of each tetrahedron. This concept can be seen in the image below:
+The driving principle behind calculating the total volume, is breaking up the mesh into many tetrahedrons, all with a common point at the origin. Triangular panels create one tetrahedron while quadrangle panels create two tetrahedrons. The total volume is simply the sum of the volumes of each tetrahedron. This concept can be seen in the image below:
 
-![](./images/tetrahedron.png)
+![](./images/meshTetrahedron.png)
 
 The volume of each individual tetrahedron is calculated using the following equation:
 
@@ -114,11 +148,11 @@ $$
 Volume = \frac{1}{6} \det{\begin{vmatrix}\vec{A}\\\vec{B}\\\vec{C}\end{vmatrix}}
 $$
 
-**Note** that the vertices A, B, and C are also vectors from the origin if the origin is [0,0,0]
+> **Note** that the vertices A, B, and C are also vectors from the origin if the origin is [0,0,0]
 
 ### Center of Buoyancy
 
-Determining the "z" component of the center of buoyancy for the mesh is a two step process. First, the centroid of each tetrahedron must be found. This is done by taking the average of all four points that construct the tetrahedron:
+Determining the center of buoyancy for the mesh is a two step process. First, the centroid of each tetrahedron is found by taking the average of all four points that construct the tetrahedron:
 
 $$
 Centroid = \frac{\vec{A}+\vec{B}+\vec{C}+Origin}{4}
@@ -133,6 +167,6 @@ $$
 Where $\rho_{w}V_{i}$ is the mass of each individual tetrahedron, and 
 $\overline{z_{i}}$ is the "z" component of the centroid for each tetrahedron.
 
-**Note** that each tetrahedron has a uniform density, so the centroid is equivalent to the center of gravity. Given that the mesh only includes sections below the water line, and that the density of water is used, the method of composite parts does in fact compute the center of buoyancy.
+> **Note** that each tetrahedron has a uniform density, so the centroid is equivalent to the center of gravity. Given that the mesh only includes sections below the water line, and that the density of water is used, the method of composite parts does in fact compute the center of buoyancy.
 
 
