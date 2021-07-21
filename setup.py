@@ -61,7 +61,7 @@ if __name__ == "__main__":
           author = 'mancellin, dav-og, dunc-lamb',
           license = 'Apache-2.0',
           url = 'https://github.com/dav-og/liteBEM',
-          packages = ['litebem', 'litebem.preprocessor', 'litebem.solver', 'litebem.postprocessor', 'litebem.solver.green_functions'],
+          packages = ['litebem', 'litebem.solver.green_functions'],# 'litebem.preprocessor', 'litebem.solver', 'litebem.postprocessor', 'litebem.solver.green_functions'],
           # install_requires = ['pytest', 'numpy', 'scipy'], # 'pandas', 'xarray'
           # entry_points={
           #     'console_scripts': [
