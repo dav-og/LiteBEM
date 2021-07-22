@@ -18,7 +18,7 @@ Recommended approach:
   > conda activate liteBemDev
   > conda install numpy
   ```
-  - **TODO:** Other dependencies can be defined in `setup(install_requires=[])` in `setup.py`
+  - **TODO:** Other dependencies (e.g. pytest, scipy) can be defined in `setup(install_requires=[])` in `setup.py`
 - Clone the LiteBEM repo to your preferred location (e.g. "C:/code/")
   ```shell
   > cd C:/code/
