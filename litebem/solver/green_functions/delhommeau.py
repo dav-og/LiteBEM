@@ -11,9 +11,9 @@ import numpy as np
 
 # from capytaine.tools.prony_decomposition import exponential_decomposition, error_exponential_decomposition
 
-from litebem.green_functions.abstract_green_function import AbstractGreenFunction
-import litebem.green_functions.delhommeau_f90 as delhommeau_f90
-#import litebem.green_functions.XieDelhommeau_f90 as XieDelhommeau_f90
+from litebem.solver.green_functions.abstract_green_function import AbstractGreenFunction
+import litebem.solver.green_functions.delhommeau_f90 as delhommeau_f90
+#import litebem.solver.green_functions.XieDelhommeau_f90 as XieDelhommeau_f90
 
 LOG = logging.getLogger(__name__)
 
@@ -197,11 +197,11 @@ class Delhommeau(AbstractGreenFunction):
 
 ################################
 
-class XieDelhommeau(Delhommeau):
-    """Variant of Nemoh's Green function, more accurate near the free surface.
+# class XieDelhommeau(Delhommeau):
+#     """Variant of Nemoh's Green function, more accurate near the free surface.
 
-    Same arguments and methods as :class:`Delhommeau`.
-    """
+#     Same arguments and methods as :class:`Delhommeau`.
+#     """
 
-    fortran_core = XieDelhommeau_f90
-    build_tabulated_integrals = lru_cache(maxsize=1)(XieDelhommeau_f90.initialize_green_wave.initialize_tabulated_integrals)
+#     fortran_core = XieDelhommeau_f90
+#     build_tabulated_integrals = lru_cache(maxsize=1)(XieDelhommeau_f90.initialize_green_wave.initialize_tabulated_integrals)

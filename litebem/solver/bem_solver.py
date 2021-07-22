@@ -2,8 +2,8 @@
 import numpy as np
 
 from datetime import datetime
-from libDelhommeau.green_functions.delhommeau import Delhommeau
-from libDelhommeau.solver import linear_solvers
+from litebem.solver.green_functions.delhommeau import Delhommeau
+from litebem.solver import linear_solvers
 
 #from capytaine.bem.engines import BasicMatrixEngine, HierarchicalToeplitzMatrixEngine
 #from capytaine.io.xarray import problems_from_dataset, assemble_dataset, kochin_data_array
