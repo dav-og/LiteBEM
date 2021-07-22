@@ -134,3 +134,5 @@ dmypy.json
 .vscode/*
 tests/noodling/*
 docs/logo/*
+*.swo
+*.swp
