@@ -13,7 +13,6 @@ import numpy as np
 
 from litebem.solver.green_functions.abstract_green_function import AbstractGreenFunction
 import litebem.solver.green_functions.delhommeau_f90 as delhommeau_f90
-#import litebem.solver.green_functions.XieDelhommeau_f90 as XieDelhommeau_f90
 
 LOG = logging.getLogger(__name__)
 
@@ -194,14 +193,3 @@ class Delhommeau(AbstractGreenFunction):
             lamda_exp, a_exp,
             mesh1 is mesh2
         )
-
-################################
-
-# class XieDelhommeau(Delhommeau):
-#     """Variant of Nemoh's Green function, more accurate near the free surface.
-
-#     Same arguments and methods as :class:`Delhommeau`.
-#     """
-
-#     fortran_core = XieDelhommeau_f90
-#     build_tabulated_integrals = lru_cache(maxsize=1)(XieDelhommeau_f90.initialize_green_wave.initialize_tabulated_integrals)
