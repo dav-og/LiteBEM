@@ -18,13 +18,13 @@ delhommeauSources = ["litebem/solver/green_functions/delhommeau_f90/constants.f9
 
 delhommeauExtension = Extension(name="litebem.solver.green_functions.delhommeau_f90",
                                 sources=delhommeauSources,
-                                extra_compile_args=['-O2', '-cpp'],#, '-fopenmp', '-fpp'],
-                                extra_f90_compile_args=['-O2', '-cpp'],#, '-fopenmp', '-fpp'],
-                                #extra_link_args=['-fopenmp'],
+                                extra_compile_args=['-O2', '-fopenmp', '-cpp'],
+                                extra_f90_compile_args=['-O2', '-fopenmp', '-cpp'],
+                                extra_link_args=['-openmp'])
                                 # Uncomment the following lines to get more
                                 # verbose output from f2py.
-                                define_macros=[('F2PY_REPORT_ATEXIT', 1),
-                                               ('F2PY_REPORT_ON_ARRAY_COPY', 1)])
+                                # define_macros=[('F2PY_REPORT_ATEXIT', 1),
+                                #               ('F2PY_REPORT_ON_ARRAY_COPY', 1)])
 
 # XieDelhommeau_extension = Extension(
 #     name="litebem.green_functions.XieDelhommeau_f90",
