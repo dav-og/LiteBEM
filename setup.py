@@ -20,7 +20,7 @@ delhommeauExtension = Extension(name="litebem.solver.green_functions.delhommeau_
                                 sources=delhommeauSources,
                                 extra_compile_args=['-O2', '-fopenmp', '-cpp'],
                                 extra_f90_compile_args=['-O2', '-fopenmp', '-cpp'],
-                                extra_link_args=['-openmp'])
+                                extra_link_args=['-fopenmp'])
                                 # Uncomment the following lines to get more
                                 # verbose output from f2py.
                                 # define_macros=[('F2PY_REPORT_ATEXIT', 1),
