@@ -142,10 +142,10 @@ class Mesh():
                                  f'\tOnly triangular and quadrilateral panels '
                                  f'are currently supported. \n')
 
-        self.panelAreas = panelAreas
-        self.panelCenters = panelCenters
-        self.panelRadii = panelRadii
-        self.panelUnitNormals = panelUnitNormals
+        self.panelAreas = np.asarray(panelAreas)
+        self.panelCenters = np.asarray(panelCenters)
+        self.panelRadii = np.asarray(panelRadii)
+        self.panelUnitNormals = np.asarray(panelUnitNormals)
 
     def waterplane_area(self):
         '''

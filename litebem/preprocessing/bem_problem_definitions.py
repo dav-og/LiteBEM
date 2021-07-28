@@ -82,10 +82,9 @@ class LinearPotentialFlowProblem:
             )
 
         if self.body is not None:
-            #TODO eliminate centers by defining vertices, and panels as np arrays in read_nemoh_mesh
-            centers = np.asarray(self.body.mesh.panelCenters)
-            if (any(centers[:, 2] > self.free_surface)
-                    or any(centers[:, 2] < self.sea_bottom)):
+            
+            if (any(self.body.mesh.panelCenters[:, 2] > self.free_surface)
+                    or any(self.body.mesh.panelCenters[:, 2] < self.sea_bottom)):
 
                 LOG.warning(
                     f"The mesh of the body {self.body.name} is not inside the domain.\n"
@@ -224,10 +223,9 @@ class DiffractionProblem(LinearPotentialFlowProblem):
                          omega=omega, rho=rho, g=g)
 
         if self.body is not None:
-            #TODO eliminate npasarray definition once initialized as np.asarray in read_nemoh_mesh
             self.boundary_condition = -(
-                    airy_waves_velocity(np.asarray(self.body.mesh.panelCenters), self, convention=self.convention)
-                    * np.asarray(self.body.mesh.panelUnitNormals)
+                    airy_waves_velocity(self.body.mesh.panelCenters, self, convention=self.convention)
+                    * self.body.mesh.panelUnitNormals
             ).sum(axis=1)
 
             if len(self.body.dofs) == 0:
@@ -281,8 +279,7 @@ class RadiationProblem(LinearPotentialFlowProblem):
                 raise ValueError("Unrecognized degree of freedom name.")
 
             dof = self.body.dofs[self.radiating_dof]
-            #TODO eliminate np.asarray definition once initialized as np.asarray in read_nemoh_mesh
-            self.boundary_condition = np.sum(dof * np.asarray(self.body.mesh.panelUnitNormals), axis=1)
+            self.boundary_condition = np.sum(dof * self.body.mesh.panelUnitNormals, axis=1)
 
     def _astuple(self):
         return super()._astuple() + (self.radiating_dof,)
