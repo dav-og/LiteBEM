@@ -1,6 +1,8 @@
 import pytest
 import numpy as np
 import litebem.preprocessing.mesh as lpm
+import litebem.preprocessing.body as lpb
+from litebem.preprocessing.bem_problem_definitions import RadiationProblem,DiffractionProblem
 
 # reference data
 
@@ -175,6 +177,22 @@ def test_compute_hydrostatic_stiffness():
 # TODO: create Body object in pre_processor.mesh that can be passed to
 # RadiationProblem as an argument
 # [ ]
+
+def test_body_definition():
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
+    body = lpb.Body(mesh)
+
+# test for defining problem objects
+def test_problem_definition():
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
+    mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
+    body = lpb.Body(mesh)
+
+    body.add_all_rigid_body_dofs()
+
+    problemR = RadiationProblem(body=body,radiating_dof="Heave",omega=1)
+    problemD = DiffractionProblem(body=body)
 
 # TODO: pass problems to solver
 # [ ]

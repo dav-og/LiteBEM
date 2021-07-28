@@ -1,4 +1,6 @@
 import numpy as np
+# from litebem.preprocessing.bem_problem_definitions import LinearPotentialFlowProblem
+from litebem.preprocessing.airy_waves import airy_waves_potential
 
 class LinearPotentialFlowResult:
 
@@ -9,7 +11,7 @@ class LinearPotentialFlowResult:
         self.potential = None
         self.fs_elevation = {}
 
-    __str__ = LinearPotentialFlowProblem.__str__
+    # __str__ = LinearPotentialFlowProblem.__str__
 
     def __getattr__(self, name):
         """Direct access to the attributes of the included problem."""

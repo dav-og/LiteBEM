@@ -12,7 +12,7 @@ import numpy as np
 import xarray as xr
 
 #from capytaine.meshes.geometry import Abstract3DObject, Plane, inplace_transformation
-from libDelhommeau.pre_processor.mesh import Mesh
+from litebem.preprocessing.mesh import Mesh
 #from capytaine.meshes.symmetric import build_regular_array_of_meshes
 #from capytaine.meshes.collections import CollectionOfMeshes
 
@@ -53,7 +53,7 @@ class Body():#Abstract3DObject):
     CollectionOfMeshes from capytaine.mesh.meshes_collection.
 
     The degrees of freedom (dofs) are stored as a dict associating a name to
-    a complex-valued array of shape (nb_faces, 3). To each face of the body
+    a complex-valued array of shape (nPanels, 3). To each face of the body
     (as indexed in the mesh) corresponds a complex-valued 3d vector, which
     defines the displacement of the center of the face in frequency domain.
 
@@ -89,17 +89,17 @@ class Body():#Abstract3DObject):
         LOG.info(f"New floating body: {self.name}.")
 
     @staticmethod
-    def from_file(filename: str, file_format=None, name=None) -> 'FloatingBody':
-        """Create a FloatingBody from a mesh file using meshmagick."""
-        from capytaine.io.mesh_loaders import load_mesh
-        if name is None:
-            name = filename
-        mesh = load_mesh(filename, file_format, name=f"{name}_mesh")
-        return FloatingBody(mesh, name=name)
+    # def from_file(filename: str, file_format=None, name=None) -> 'FloatingBody':
+    #     """Create a FloatingBody from a mesh file using meshmagick."""
+    #     from capytaine.io.mesh_loaders import load_mesh
+    #     if name is None:
+    #         name = filename
+    #     mesh = load_mesh(filename, file_format, name=f"{name}_mesh")
+    #     return FloatingBody(mesh, name=name)
 
-    def __lt__(self, other: 'FloatingBody') -> bool:
-        """Arbitrary order. The point is to sort together the problems involving the same body."""
-        return self.name < other.name
+    # def __lt__(self, other: 'FloatingBody') -> bool:
+    #     """Arbitrary order. The point is to sort together the problems involving the same body."""
+    #     return self.name < other.name
 
     ##########
     #  Dofs  #
@@ -135,7 +135,7 @@ class Body():#Abstract3DObject):
         direction = np.asarray(direction)
         assert direction.shape == (3,)
 
-        motion = np.empty((self.mesh.nb_faces, 3))
+        motion = np.empty((self.mesh.nPanels, 3))
         motion[:, :] = direction
         self.dofs[name] = amplitude * motion
 
@@ -174,10 +174,10 @@ class Body():#Abstract3DObject):
         if name is None:
             name = f"dof_{self.nb_dofs}_rotation"
 
-        if self.mesh.nb_faces == 0:
-            self.dofs[name] = np.empty((self.mesh.nb_faces, 3))
+        if self.mesh.nPanels == 0:
+            self.dofs[name] = np.empty((self.mesh.nPanels, 3))
         else:
-            motion = np.cross(axis_point - self.mesh.faces_centers, axis_direction)
+            motion = np.cross(axis_point - self.mesh.panelCenters, axis_direction)
             self.dofs[name] = amplitude * motion
 
     def add_all_rigid_body_dofs(self) -> None:
@@ -234,8 +234,8 @@ class Body():#Abstract3DObject):
     def combine_dofs(bodies) -> dict:
         """Combine the degrees of freedom of several bodies."""
         dofs = {}
-        cum_nb_faces = accumulate(chain([0], (body.mesh.nb_faces for body in bodies)))
-        total_nb_faces = sum(body.mesh.nb_faces for body in bodies)
+        cum_nb_faces = accumulate(chain([0], (body.mesh.nPanels for body in bodies)))
+        total_nb_faces = sum(body.mesh.nPanels for body in bodies)
         for body, nbf in zip(bodies, cum_nb_faces):
             # nbf is the cumulative number of faces of the previous subbodies,
             # that is the offset of the indices of the faces of the current body.
@@ -252,7 +252,7 @@ class Body():#Abstract3DObject):
                 dofs[new_dof_name] = new_dof
         return dofs
 
-    def copy(self, name=None) -> 'FloatingBody':
+    def copy(self, name=None) -> 'Body':
         """Return a deep copy of the body.
 
         Parameters
@@ -284,11 +284,11 @@ class Body():#Abstract3DObject):
     #     FloatingBody
     #     """
     #     array_mesh = build_regular_array_of_meshes(self.mesh, distance, nb_bodies)
-    #     total_nb_faces = array_mesh.nb_faces
+    #     total_nb_faces = array_mesh.nPanels
     #     array_dofs = {}
     #     for dof_name, dof in self.dofs.items():
     #         for i, j in product(range(nb_bodies[0]), range(nb_bodies[1])):
-    #             shift_nb_faces = (j*nb_bodies[0] + i) * self.mesh.nb_faces
+    #             shift_nb_faces = (j*nb_bodies[0] + i) * self.mesh.nPanels
     #             new_dof = np.zeros((total_nb_faces, 3))
     #             new_dof[shift_nb_faces:shift_nb_faces+len(dof), :] = dof
     #             array_dofs[f'{i}_{j}__{dof_name}'] = new_dof
@@ -298,14 +298,14 @@ class Body():#Abstract3DObject):
         """Create a new FloatingBody by extracting some faces from the mesh.
         The dofs evolve accordingly.
         """
-        if isinstance(self.mesh, CollectionOfMeshes):
+        if isinstance(self.mesh):
             raise NotImplementedError  # TODO
 
         if return_index:
             new_mesh, id_v = Mesh.extract_faces(self.mesh, id_faces_to_extract, return_index)
         else:
             new_mesh = Mesh.extract_faces(self.mesh, id_faces_to_extract, return_index)
-        new_body = FloatingBody(new_mesh)
+        new_body = Body(new_mesh)
         LOG.info(f"Extract floating body from {self.name}.")
 
         new_body.dofs = {}
@@ -429,12 +429,12 @@ class Body():#Abstract3DObject):
         return self.clip(plane, inplace=False, **kwargs)
 
     @inplace_transformation
-    def keep_immersed_part(self, free_surface=0.0, sea_bottom=-np.infty):
-        """Remove the parts of the mesh above the sea bottom and below the free surface."""
-        self.clip(Plane(normal=(0, 0, 1), point=(0, 0, free_surface)))
-        if sea_bottom > -np.infty:
-            self.clip(Plane(normal=(0, 0, -1), point=(0, 0, sea_bottom)))
-        return self
+    # def keep_immersed_part(self, free_surface=0.0, sea_bottom=-np.infty):
+    #     """Remove the parts of the mesh above the sea bottom and below the free surface."""
+    #     self.clip(Plane(normal=(0, 0, 1), point=(0, 0, free_surface)))
+    #     if sea_bottom > -np.infty:
+    #         self.clip(Plane(normal=(0, 0, -1), point=(0, 0, sea_bottom)))
+    #     return self
 
     #############
     #  Display  #
@@ -447,12 +447,12 @@ class Body():#Abstract3DObject):
         return (f"{self.__class__.__name__}(mesh={self.mesh.name}, "
                 f"dofs={{{', '.join(self.dofs.keys())}}}, name={self.name})")
 
-    def show(self, **kwargs):
-        from capytaine.ui.vtk.body_viewer import FloatingBodyViewer
-        viewer = FloatingBodyViewer()
-        viewer.add_body(self, **kwargs)
-        viewer.show()
-        viewer.finalize()
+    # def show(self, **kwargs):
+    #     from capytaine.ui.vtk.body_viewer import FloatingBodyViewer
+    #     viewer = FloatingBodyViewer()
+    #     viewer.add_body(self, **kwargs)
+    #     viewer.show()
+    #     viewer.finalize()
 
     def show_matplotlib(self, *args, **kwargs):
         return self.mesh.show_matplotlib(*args, **kwargs)
@@ -467,12 +467,12 @@ class Body():#Abstract3DObject):
             If a single string is passed, it is assumed to be the name of a dof
             and this dof with a unit amplitude will be displayed.
         """
-        from capytaine.ui.vtk.animation import Animation
-        if isinstance(motion, str):
-            motion = {motion: 1.0}
-        elif isinstance(motion, xr.DataArray):
-            motion = {k: motion.sel(radiating_dof=k).data for k in motion.coords["radiating_dof"].data}
-        animation = Animation(*args, **kwargs)
-        animation._add_actor(self.mesh.merged(), faces_motion=sum(motion[dof_name] * dof for dof_name, dof in self.dofs.items() if dof_name in motion))
-        return animation
+        # from capytaine.ui.vtk.animation import Animation
+        # if isinstance(motion, str):
+        #     motion = {motion: 1.0}
+        # elif isinstance(motion, xr.DataArray):
+        #     motion = {k: motion.sel(radiating_dof=k).data for k in motion.coords["radiating_dof"].data}
+        # animation = Animation(*args, **kwargs)
+        # animation._add_actor(self.mesh.merged(), faces_motion=sum(motion[dof_name] * dof for dof_name, dof in self.dofs.items() if dof_name in motion))
+        # return animation
 

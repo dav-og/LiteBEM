@@ -9,7 +9,8 @@ import logging
 import numpy as np
 from scipy.optimize import newton
 
-from libDelhommeau.pre_processor.airy_waves import airy_waves_velocity
+from litebem.preprocessing.airy_waves import airy_waves_velocity
+from litebem.postprocessing.results import LinearPotentialFlowResult,DiffractionResult,RadiationResult
 
 LOG = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class LinearPotentialFlowProblem:
         The density of water in kg/m3 (default: 1000.0)
     g: float, optional
         The acceleration of gravity in m/s2 (default: 9.81)
-    boundary_condition: np.ndarray of shape (body.mesh.nb_faces,)
+    boundary_condition: np.ndarray of shape (body.mesh.nPanels,)
         The Neumann boundary condition on the floating body
     TODO: more consistent use of free_surface and sea_bottom vs. water_depth
     """
@@ -81,8 +82,10 @@ class LinearPotentialFlowProblem:
             )
 
         if self.body is not None:
-            if (any(self.body.mesh.faces_centers[:, 2] > self.free_surface)
-                    or any(self.body.mesh.faces_centers[:, 2] < self.sea_bottom)):
+            #TODO eliminate centers by defining vertices, and panels as np arrays in read_nemoh_mesh
+            centers = np.asarray(self.body.mesh.panelCenters)
+            if (any(centers[:, 2] > self.free_surface)
+                    or any(centers[:, 2] < self.sea_bottom)):
 
                 LOG.warning(
                     f"The mesh of the body {self.body.name} is not inside the domain.\n"
@@ -94,10 +97,10 @@ class LinearPotentialFlowProblem:
             if len(self.boundary_condition.shape) != 1:
                 raise ValueError("Expected a 1-dimensional array as boundary_condition")
 
-            if self.boundary_condition.shape[0] != self.body.mesh.nb_faces:
+            if self.boundary_condition.shape[0] != self.body.mesh.nPanels:
                 raise ValueError(
                     f"The shape of the boundary condition ({self.boundary_condition.shape})"
-                    f"does not match the number of faces of the mesh ({self.body.mesh.nb_faces})."
+                    f"does not match the number of faces of the mesh ({self.body.mesh.nPanels})."
                 )
 
     @property
@@ -221,10 +224,10 @@ class DiffractionProblem(LinearPotentialFlowProblem):
                          omega=omega, rho=rho, g=g)
 
         if self.body is not None:
-
+            #TODO eliminate npasarray definition once initialized as np.asarray in read_nemoh_mesh
             self.boundary_condition = -(
-                    airy_waves_velocity(self.body.mesh.faces_centers, self, convention=self.convention)
-                    * self.body.mesh.faces_normals
+                    airy_waves_velocity(np.asarray(self.body.mesh.panelCenters), self, convention=self.convention)
+                    * np.asarray(self.body.mesh.panelUnitNormals)
             ).sum(axis=1)
 
             if len(self.body.dofs) == 0:
@@ -278,7 +281,8 @@ class RadiationProblem(LinearPotentialFlowProblem):
                 raise ValueError("Unrecognized degree of freedom name.")
 
             dof = self.body.dofs[self.radiating_dof]
-            self.boundary_condition = np.sum(dof * self.body.mesh.faces_normals, axis=1)
+            #TODO eliminate np.asarray definition once initialized as np.asarray in read_nemoh_mesh
+            self.boundary_condition = np.sum(dof * np.asarray(self.body.mesh.panelUnitNormals), axis=1)
 
     def _astuple(self):
         return super()._astuple() + (self.radiating_dof,)

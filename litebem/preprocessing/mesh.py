@@ -21,6 +21,7 @@ class Mesh():
         self.vertices = vertices
         self.panels = panels
         self.nPanels = len(panels)
+        self.name = 'Mesh'
         self.get_triangle_quad_ids()
         self.compute_panel_properties()
         self.construct_polygons()
@@ -75,6 +76,7 @@ class Mesh():
         panelAreas = []
         panelCenters = []
         panelRadii = []
+        #TODO initialize panels and vertices as np.arrays, subtract 1 at the beginning to eliminate "-1" in all panel indexing (refer to beginning of compute_volume_COB)
         for iPanel, panel in enumerate(self.panels):
             if iPanel+1 in self.trianglesIDs:
                 triangleNormal = np.cross(self.vertices[panel[1]-1] - self.vertices[panel[0]-1],
