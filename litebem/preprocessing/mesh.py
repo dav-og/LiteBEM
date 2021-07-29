@@ -349,6 +349,13 @@ class Mesh():
 
         return moments
 
+    @property
+    def quadraturePoints(self):
+        return (
+                self.panelCenters.reshape((self.nPanels, 1, 3)),  # Points
+                self.panelAreas.reshape((self.nPanels, 1))        # Weights
+            )
+
 def read_nemoh_mesh(pathToMesh):#
     '''
     reads nemoh mesh file; return headers, vertices and panels.
