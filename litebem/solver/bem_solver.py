@@ -1,4 +1,4 @@
-#import logging
+import logging
 import numpy as np
 
 from datetime import datetime
@@ -8,7 +8,7 @@ from litebem.solver import linear_solvers
 #from capytaine.bem.engines import BasicMatrixEngine, HierarchicalToeplitzMatrixEngine
 #from capytaine.io.xarray import problems_from_dataset, assemble_dataset, kochin_data_array
 
-#LOG = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 from collections import OrderedDict
 from functools import wraps
@@ -111,23 +111,24 @@ class BasicMatrixEngine():#MatrixEngine):
             the matrices :math:`S` and :math:`K`
         """
 
-        if (isinstance(mesh1, ReflectionSymmetricMesh)
-                and isinstance(mesh2, ReflectionSymmetricMesh)
-                and mesh1.plane == mesh2.plane):
+        #TODO check if this segment of code is relavent to our BEM solver
+        # if (isinstance(mesh1, ReflectionSymmetricMesh)
+        #         and isinstance(mesh2, ReflectionSymmetricMesh)
+        #         and mesh1.plane == mesh2.plane):
 
-            S_a, V_a = self.build_matrices(
-                mesh1[0], mesh2[0], free_surface, sea_bottom, wavenumber,
-                green_function)
-            S_b, V_b = self.build_matrices(
-                mesh1[0], mesh2[1], free_surface, sea_bottom, wavenumber,
-                green_function)
+        #     S_a, V_a = self.build_matrices(
+        #         mesh1[0], mesh2[0], free_surface, sea_bottom, wavenumber,
+        #         green_function)
+        #     S_b, V_b = self.build_matrices(
+        #         mesh1[0], mesh2[1], free_surface, sea_bottom, wavenumber,
+        #         green_function)
 
-            return BlockSymmetricToeplitzMatrix([[S_a, S_b]]), BlockSymmetricToeplitzMatrix([[V_a, V_b]])
+        #     return BlockSymmetricToeplitzMatrix([[S_a, S_b]]), BlockSymmetricToeplitzMatrix([[V_a, V_b]])
 
-        else:
-            return green_function.evaluate(
-                mesh1, mesh2, free_surface, sea_bottom, wavenumber,
-            )
+        # else:
+        return green_function.evaluate(
+            mesh1, mesh2, free_surface, sea_bottom, wavenumber,
+        )
 
 class BEMSolver:
     """
@@ -176,8 +177,8 @@ class BEMSolver:
         """
         LOG.info("Solve %s.", problem)
 
-        if problem.wavelength < 8*problem.body.mesh.faces_radiuses.max():
-            LOG.warning(f"Resolution of the mesh (8×max_radius={8*problem.body.mesh.faces_radiuses.max():.2e}) "
+        if problem.wavelength < 8*problem.body.mesh.panelRadii.max():
+            LOG.warning(f"Resolution of the mesh (8×max_radius={8*problem.body.mesh.panelRadii.max():.2e}) "
                         f"might be insufficient for this wavelength (wavelength={problem.wavelength:.2e})!")
 
         S, K = self.engine.build_matrices(
@@ -195,9 +196,9 @@ class BEMSolver:
 
         for influenced_dof_name, influenced_dof_vectors in problem.influenced_dofs.items():
             # Scalar product on each face:
-            influenced_dof_normal = np.sum(influenced_dof_vectors * problem.body.mesh.faces_normals, axis=1)
+            influenced_dof_normal = np.sum(influenced_dof_vectors * problem.body.mesh.panelUnitNormals, axis=1)
             # Sum over all faces:
-            integrated_potential = - problem.rho * np.sum(potential * influenced_dof_normal * problem.body.mesh.faces_areas)
+            integrated_potential = - problem.rho * np.sum(potential * influenced_dof_normal * problem.body.mesh.panelAreas)
             # Store result:
             result.store_force(influenced_dof_name, integrated_potential)
             # Depending of the type of problem, the force will be kept as a complex-valued Froude-Krylov force

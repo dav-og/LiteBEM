@@ -181,11 +181,12 @@ class Delhommeau(AbstractGreenFunction):
                 coeffs = np.array((1.0, 1.0, 1.0))
 
         # Main call to Fortran code
+        # TODO confirm that we dont need to add 1 to mesh panels because our definitions start at 1 already
         return self.fortran_core.matrices.build_matrices(
-            mesh1.faces_centers, mesh1.faces_normals,
-            mesh2.vertices,      mesh2.faces + 1,
-            mesh2.faces_centers, mesh2.faces_normals,
-            mesh2.faces_areas,   mesh2.faces_radiuses,
+            mesh1.panelCenters, mesh1.panelUnitNormals,
+            mesh2.vertices,      mesh2.panels,
+            mesh2.panelCenters, mesh2.panelUnitNormals,
+            mesh2.panelAreas,   mesh2.panelRadii,
             *mesh2.quadrature_points,
             wavenumber, 0.0 if depth == np.infty else depth,
             coeffs,
