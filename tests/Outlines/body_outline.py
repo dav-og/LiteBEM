@@ -18,4 +18,11 @@ problemD = DiffractionProblem(body=body)
 
 solver = lps.BEMSolver()
 
-result = solver.solve(problemR)
+resultR = solver.solve(problemR)
+resultD = solver.solve(problemD)
+
+print(resultR.period)
+print(resultR.added_masses)
+print(resultR.radiation_dampings)
+print(resultD.forces)
+
