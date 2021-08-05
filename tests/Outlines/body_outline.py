@@ -2,6 +2,7 @@ import litebem.preprocessing.mesh as lpm
 import litebem.preprocessing.body as lpb
 from litebem.preprocessing.bem_problem_definitions import RadiationProblem,DiffractionProblem
 import litebem.solver.bem_solver as lps
+import numpy as np
 
 hemi360Mesh = f'tests/unit/preprocessorRefData/hemisphere360.nemoh'
 
@@ -11,18 +12,29 @@ mesh = lpm.Mesh(meshVerts,meshFaces,name=f'hemi360')
 
 body = lpb.Body(mesh)
 
-body.add_all_rigid_body_dofs()
+body.add_translation_dof(name='Heave')
 
-problemR = RadiationProblem(body=body,radiating_dof='Heave',omega=1)
-problemD = DiffractionProblem(body=body)
+problems = []
+omega = np.linspace(0.1,4,40)
+
+for omega in omega:
+    problem = RadiationProblem(body=body,radiating_dof='Heave',omega=omega)
+    problems.append(problem)
 
 solver = lps.BEMSolver()
 
-resultR = solver.solve(problemR)
-resultD = solver.solve(problemD)
+resultR = solver.solve_all(problems)
 
-print(resultR.period)
-print(resultR.added_masses)
-print(resultR.radiation_dampings)
-print(resultD.forces)
+addedMass = []
+radiationDamping = []
+
+addedMassData = open('tests/unit/solverRefData/addedMass.txt','w')
+radiationDampingData = open('tests/unit/solverRefData/radiationDamping.txt','w')
+
+for result in resultR:
+    addedMassData.write(str(result.added_masses['Heave']) + '\n')
+    radiationDampingData.write(str(result.radiation_dampings['Heave']) + '\n')
+
+addedMassData.close()
+radiationDampingData.close()
 
