@@ -21,7 +21,7 @@ class Mesh():
         self.vertices = vertices
         self.panels = panels
         self.nPanels = len(panels)
-        self.name = 'Mesh'
+        self.name = 'mesh'
         self.get_triangle_quad_ids()
         self.compute_panel_properties()
         self.construct_polygons()
@@ -33,7 +33,6 @@ class Mesh():
 
         Notes
         -----
-        - this function is called upon instantiation of the Mesh class
         - this function will identify if any panels have the same vertex listed
           twice
         - TODO: compute_panel_properties() expects the first and last vertex to
@@ -41,7 +40,6 @@ class Mesh():
           identifying which vertices are the same and modifying the vector
           expressions accordingly
         '''
-
         trianglesIDs = []
         quadranglesIDs = []
         for iPanel, panel in enumerate(self.panels):
@@ -57,80 +55,115 @@ class Mesh():
         self.trianglesIDs = trianglesIDs
         self.quadranglesIDs = quadranglesIDs
 
+    def unit_normal_vector(self, vecA, vecB):
+        '''calculate unit normal from two vectors'''
+        normVec = np.cross(vecA, vecB)
+        normLen = np.linalg.norm(normVec)
+        unitNorm = normVec / normLen
+        return normVec, normLen, unitNorm
+
+    def vector_area_triangle(self, normLen):
+        '''calculate area of a triangle'''
+        return normLen * 0.5
+
+    def center_triangle(self, vertA, vertB, vertC):
+        '''calculate center of a triangle panel'''
+        return (vertA + vertB + vertC)/3.0
+
+    def center_quad(self, vertA, vertB, vertC, vertD, areaTriA, areaTriB, quadArea):
+        '''calculate center of a quad panel'''
+        # TODO: check different method for calculation (weight 4
+        # constituent triangles, not just 2!)
+        centerTriA = self.center_triangle(vertA, vertB, vertC)
+        centerTriB = self.center_triangle(vertA, vertC, vertD)
+        # triABD
+        # triBCD
+        quadCenter = (areaTriA*centerTriA + areaTriB*centerTriB)/(quadArea)
+        return quadCenter
+
+    def tri_panel_properties(self, panel):
+        '''return triangle panel properties'''
+        # fix: subtract 1 to correct for nemoh mesh indexing convention
+        # TODO: move this fix higher up
+        vertA = self.vertices[panel[0]-1]
+        vertB = self.vertices[panel[1]-1]
+        vertC = self.vertices[panel[2]-1]
+        panelVertices = [vertA, vertB, vertC]
+
+        vecAB = vertB - vertA
+        vecAC = vertC - vertA
+        triNorm, triNormLen, triUnitNorm = self.unit_normal_vector(vecAB, vecAC)
+        triArea = self.vector_area_triangle(triNormLen)
+        triCenter = self.center_triangle(vertA, vertB, vertC)
+
+        radiiMag = []
+        for coord in panelVertices:
+            radiiVec = coord - triCenter
+            radiiMag.append(np.linalg.norm(radiiVec))
+        triRadius = max(radiiMag)
+
+        return triUnitNorm, triArea, triCenter, triRadius
+
+    def quad_panel_properties(self, panel):
+        '''return quad panel properties'''
+        # fix: subtract 1 to correct for nemoh mesh indexing convention
+        # TODO: move this fix higher up
+        vertA = self.vertices[panel[0]-1]
+        vertB = self.vertices[panel[1]-1]
+        vertC = self.vertices[panel[2]-1]
+        vertD = self.vertices[panel[3]-1]
+
+        panelVertices = [vertA, vertB, vertC, vertD]
+
+        vecAC = vertC - vertA
+        vecBD = vertD - vertB
+        vecAB = vertB - vertA
+        vecAD = vertD - vertA
+
+        quadNorm, quadNormLen, quadUnitNorm = self.unit_normal_vector(vecAC, vecBD)
+        triANorm, triANormLen, triAUnitNorm = self.unit_normal_vector(vecAB, vecAC)
+        triBNorm, triBNormLen, triBUnitNorm = self.unit_normal_vector(vecAD, vecAC)
+        areaTriA = self.vector_area_triangle(triANormLen)
+        areaTriB = self.vector_area_triangle(triBNormLen)
+        quadArea = areaTriA + areaTriB
+
+        # center calculation
+        quadCenter = self.center_quad(vertA, vertB, vertC, vertD, areaTriA,
+                                      areaTriB, quadArea)
+
+        # radius calculation
+        radiiMag = []
+        for coord in panelVertices:
+            radiiVec = coord-quadCenter
+            radiiMag.append(np.linalg.norm(radiiVec))
+        quadRadius = max(radiiMag)
+
+        return quadCenter, quadUnitNorm, quadArea, quadRadius
+
     def compute_panel_properties(self):
         '''
         calculate panel normal vectors, areas, centers and radii
 
         Notes
         -----
-        - this function is called upon instantiation of the Mesh class
-        - several vector expressions are implemented to create class attributes
-          for the panel normals, areas, centers and radii
-        - TODO: create separate functions for th different vector operations to
-          shorten this particular function
         - TODO: add warning/error for triangular panels that are not defined by
           repeating vertices 1 and 4
         '''
-
         panelUnitNormals = []
         panelAreas = []
         panelCenters = []
         panelRadii = []
-        #TODO initialize panels and vertices as np.arrays, subtract 1 at the beginning to eliminate "-1" in all panel indexing (refer to beginning of compute_volume_COB)
         for iPanel, panel in enumerate(self.panels):
             if iPanel+1 in self.trianglesIDs:
-                triangleNormal = np.cross(self.vertices[panel[1]-1] - self.vertices[panel[0]-1],
-                                          self.vertices[panel[2]-1] - self.vertices[panel[0]-1])
-                triangleNormalMag = np.linalg.norm(triangleNormal)
-                triangleUnitNormal = triangleNormal / triangleNormalMag
-                triangleArea = 0.5 * triangleNormalMag
-                triangleCenter = (self.vertices[panel[0]-1] + self.vertices[panel[1]-1] + self.vertices[panel[2]-1])/3.0
-
-                panelVertices = [self.vertices[panel[0]-1], self.vertices[panel[1]-1],
-                                 self.vertices[panel[2]-1]]
-                radiiMag = []
-
-                for coord in panelVertices:
-                    radiiVector = coord-triangleCenter
-                    radiiMag.append(np.linalg.norm(radiiVector))
-
-                triangleRadius = max(radiiMag)
-
-                panelUnitNormals.append(triangleUnitNormal)
-                panelAreas.append(triangleArea)
-                panelCenters.append(triangleCenter)
-                panelRadii.append(triangleRadius)
-
+                triUnitNorm, triArea, triCenter, triRadius = self.tri_panel_properties(panel)
+                panelUnitNormals.append(triUnitNorm)
+                panelAreas.append(triArea)
+                panelCenters.append(triCenter)
+                panelRadii.append(triRadius)
             elif iPanel+1 in self.quadranglesIDs:
-                quadNormal = np.cross(self.vertices[panel[2]-1] - self.vertices[panel[0]-1],
-                                      self.vertices[panel[3]-1] - self.vertices[panel[1]-1])
-                quadNormalMag = np.linalg.norm(quadNormal)
-                quadUnitNormal = quadNormal / quadNormalMag
-
-                # area calculation
-                a1 = np.linalg.norm(np.cross(self.vertices[panel[1]-1] - self.vertices[panel[0]-1],
-                                             self.vertices[panel[2]-1] - self.vertices[panel[0]-1]))*0.5
-                a2 = np.linalg.norm(np.cross(self.vertices[panel[3]-1] - self.vertices[panel[0]-1],
-                                             self.vertices[panel[2]-1] - self.vertices[panel[0]-1]))*0.5
-                quadArea = a1 + a2
-
-                # center calculation 
-                # TODO: check different method for calculation
-                c1 = (self.vertices[panel[0]-1] + self.vertices[panel[1]-1] + self.vertices[panel[2]-1])/3.0
-                c2 = (self.vertices[panel[0]-1] + self.vertices[panel[2]-1] + self.vertices[panel[3]-1])/3.0
-                quadCenter = (a1*c1 + a2*c2)/(quadArea)
-
-                # radius calculation
-                panelVertices = [self.vertices[panel[0]-1], self.vertices[panel[1]-1],
-                                 self.vertices[panel[2]-1], self.vertices[panel[3]-1]]
-                radiiMag = []
-                for coord in panelVertices:
-                    radiiVector = coord-quadCenter
-                    radiiMag.append(np.linalg.norm(radiiVector))
-                quadRadius = max(radiiMag)
-
+                quadCenter, quadUnitNorm, quadArea, quadRadius = self.quad_panel_properties(panel)
                 panelCenters.append(quadCenter)
-                panelUnitNormals.append(quadUnitNormal)
+                panelUnitNormals.append(quadUnitNorm)
                 panelAreas.append(quadArea)
                 panelRadii.append(quadRadius)
             else:
@@ -148,10 +181,7 @@ class Mesh():
         self.panelUnitNormals = np.asarray(panelUnitNormals)
 
     def waterplane_area(self):
-        '''
-        calculates the waterplane area for the given mesh
-        '''
-
+        '''calculates the waterplane area for the given mesh'''
         sum1 = 0
         sum2 = 0
 
@@ -168,7 +198,7 @@ class Mesh():
             index2 = (i+1)%len(points)
             prod = points[index2,0]*points[i,1]
             sum2 += prod
-        
+
         self.waterplaneArea = abs(1/2*(sum1-sum2))
 
     def construct_polygons(self):
@@ -181,34 +211,27 @@ class Mesh():
         panels = panels-1
 
         z = vertices[:,2]
-        
+
         verticesOnPlane = z == 0
         panelsOn = verticesOnPlane[panels].sum(axis=1)
         panelsOnIDs = np.nonzero(panelsOn)
         panelsOnPlane = panels[panelsOnIDs[0]]
 
         panelPlaneVertices = dict()
-        
-        for i in range(len(panelsOnPlane)):
 
+        for i in range(len(panelsOnPlane)):
             for j in range(len(panelsOnPlane[i])):
-                
                 if verticesOnPlane[panelsOnPlane[i,j]] == True:
                     topLeft = panelsOnPlane[i,j+1]
                     topRight = panelsOnPlane[i,j]
-
                     panelPlaneVertices[topLeft] = topRight
-
                     break
-
         path = list()
-        
         while True:
             vLeftInit,vRight = panelPlaneVertices.popitem()
             path.append(vLeftInit)
             path.append(vRight)
             vLeftNew = vRight
-
             while True:
                 try:
                     vRight = panelPlaneVertices.pop(vLeftNew)
@@ -217,18 +240,13 @@ class Mesh():
                 except KeyError:
                     break
             break
-
         self.polygons = path
 
-    def compute_volume_CoB(self):
-        '''
-        Calculates the displaced volume and center of buoyancy of the mesh
-        '''
-        
+    def compute_volume_cob(self, rhoW=1023):
+        '''calculates the displaced volume and center of buoyancy of the mesh'''
         panels = np.asarray(self.panels)-1
         vertices = np.asarray(self.vertices)
         origin = np.asarray([0,0,0])
-        rhoW = 1023
 
         volumes = list()
         centroids = list()
@@ -240,7 +258,7 @@ class Mesh():
                 vertB = vertices[panel[1]]
                 vertC = vertices[panel[2]]
 
-                Vi = np.linalg.det([vertA,vertB,vertC])/6
+                Vi = np.linalg.det([vertA, vertB, vertC])/6
                 Ci = (vertA + vertB + vertC + origin)/4
 
                 volumes.append(Vi)
@@ -252,8 +270,8 @@ class Mesh():
                 vertC = vertices[panel[2]]
                 vertD = vertices[panel[3]]
 
-                Vi1 = np.linalg.det([vertA,vertB,vertC])/6
-                Vi2 = np.linalg.det([vertA,vertC,vertD])/6
+                Vi1 = np.linalg.det([vertA, vertB, vertC])/6
+                Vi2 = np.linalg.det([vertA, vertC, vertD])/6
                 Ci1 = (vertA + vertB + vertC + origin)/4
                 Ci2 = (vertA + vertC + vertD + origin)/4
 
@@ -275,17 +293,18 @@ class Mesh():
 
         return volumeTotal,zb
 
-    def compute_hydrostatic_stiffness(self,CoG,volume=True,CoB=True,rhoW=1023,g=9.81):
+    def compute_hydrostatic_stiffness(self, cog, volume=True, cob=True,
+                                      rhoW=1023, g=9.81):
         if volume == True:
-            values = self.compute_volume_CoB()
+            values = self.compute_volume_cob()
             volume = values[0]
-            if CoB == True:
-                CoB = values[1]
-        
+            if cob == True:
+                cob = values[1]
+
         moments = self.compute_moments_of_area()
 
-        gmT = moments[2]/volume - (CoG-CoB)
-        gmL = moments[3]/volume - (CoG-CoB)
+        gmT = moments[2]/volume - (cog-cob)
+        gmL = moments[3]/volume - (cog-cob)
 
         K33 = rhoW*g*self.waterplaneArea
         K34 = rhoW*g*moments[0]
@@ -304,7 +323,7 @@ class Mesh():
         stiffnessMatrix[np.fabs(stiffnessMatrix) < 1e-4] = 0
 
         return stiffnessMatrix
-        
+
     def compute_moments_of_area(self):
         sumSx = 0
         sumSy = 0
@@ -334,13 +353,13 @@ class Mesh():
             sumIx += termIx*area
             sumIy += termIy*area
             sumIxy += termIxy*area
-            
+
         Sx = (1/6)*sumSx
         Sy = (1/6)*sumSy
         Ix = (1/12)*sumIx
         Iy = (1/12)*sumIy
         Ixy = (1/24)*sumIxy
-        
+
         moments.append(Sx)
         moments.append(Sy)
         moments.append(Ix)
@@ -351,10 +370,8 @@ class Mesh():
 
     @property
     def quadraturePoints(self):
-        return (
-                self.panelCenters.reshape((self.nPanels, 1, 3)),  # Points
-                self.panelAreas.reshape((self.nPanels, 1))        # Weights
-            )
+        return (self.panelCenters.reshape((self.nPanels, 1, 3)),  # Points
+                self.panelAreas.reshape((self.nPanels, 1)))       # Weights
 
 def read_nemoh_mesh(pathToMesh):#
     '''

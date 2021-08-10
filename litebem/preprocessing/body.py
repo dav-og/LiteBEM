@@ -6,7 +6,7 @@
 
 import logging
 import copy
-from itertools import chain, accumulate, product, zip_longest
+from itertools import chain, accumulate #, product, zip_longest
 
 import numpy as np
 import xarray as xr
@@ -21,32 +21,28 @@ LOG = logging.getLogger(__name__)
 TRANSLATION_DOFS_DIRECTIONS = {"surge": (1, 0, 0), "sway": (0, 1, 0), "heave": (0, 0, 1)}
 ROTATION_DOFS_AXIS = {"roll": (1, 0, 0), "pitch": (0, 1, 0), "yaw": (0, 0, 1)}
 
+# ###########################################
+# #  DECORATOR FOR INPLACE TRANSFORMATIONS  #
+# ###########################################
+
+# def inplace_transformation(inplace_function):
+#     """Decorator for methods transforming 3D objects:
+#     * Add the optional argument `inplace` to return a new object instead of doing the transformation in place.
+#     * If the object has properties cached in an "__internals__" dict, they are deleted.
+#     """
+#     def enhanced_inplace_function(self, *args, inplace=True, name=None, **kwargs):
+#         if not inplace:
+#             object3d = self.copy(name=name)
+#         else:
+#             object3d = self
+#         inplace_function(object3d, *args, **kwargs)
+#         if hasattr(object3d, '__internals__'):
+#             object3d.__internals__.clear()
+#         return object3d
+#     return enhanced_inplace_function
 
 
-###########################################
-#  DECORATOR FOR INPLACE TRANSFORMATIONS  #
-###########################################
-
-def inplace_transformation(inplace_function):
-    """Decorator for methods transforming 3D objects:
-    * Add the optional argument `inplace` to return a new object instead of doing the transformation in place.
-    * If the object has properties cached in an "__internals__" dict, they are deleted.
-    """
-    def enhanced_inplace_function(self, *args, inplace=True, name=None, **kwargs):
-        if not inplace:
-            object3d = self.copy(name=name)
-        else:
-            object3d = self
-        inplace_function(object3d, *args, **kwargs)
-        if hasattr(object3d, '__internals__'):
-            object3d.__internals__.clear()
-        return object3d
-    return enhanced_inplace_function
-
-
-
-
-class Body():#Abstract3DObject):
+class Body():
     """A body described as a mesh and some degrees of freedom.
 
     The mesh structure is stored as a Mesh from capytaine.mesh.mesh or a
@@ -88,7 +84,7 @@ class Body():#Abstract3DObject):
 
         LOG.info(f"New floating body: {self.name}.")
 
-    @staticmethod
+    # @staticmethod
     # def from_file(filename: str, file_format=None, name=None) -> 'FloatingBody':
     #     """Create a FloatingBody from a mesh file using meshmagick."""
     #     from capytaine.io.mesh_loaders import load_mesh
@@ -189,32 +185,32 @@ class Body():#Abstract3DObject):
         self.add_rotation_dof(name="Pitch")
         self.add_rotation_dof(name="Yaw")
 
-    @inplace_transformation
-    def keep_only_dofs(self, dofs):
-        for dof in list(self.dofs.keys()):
-            if dof not in dofs:
-                del self.dofs[dof]
+    # @inplace_transformation
+    # def keep_only_dofs(self, dofs):
+    #     for dof in list(self.dofs.keys()):
+    #         if dof not in dofs:
+    #             del self.dofs[dof]
 
-        if hasattr(self, 'inertia_matrix'):
-            self.inertia_matrix = self.inertia_matrix.sel(radiating_dof=dofs, influenced_dof=dofs)
-        if hasattr(self, 'hydrostatic_stiffness'):
-            self.hydrostatic_stiffness = self.hydrostatic_stiffness.sel(radiating_dof=dofs, influenced_dof=dofs)
+    #     if hasattr(self, 'inertia_matrix'):
+    #         self.inertia_matrix = self.inertia_matrix.sel(radiating_dof=dofs, influenced_dof=dofs)
+    #     if hasattr(self, 'hydrostatic_stiffness'):
+    #         self.hydrostatic_stiffness = self.hydrostatic_stiffness.sel(radiating_dof=dofs, influenced_dof=dofs)
 
-        return self
+    #     return self
 
-    def add_dofs_labels_to_vector(self, vector):
-        """Helper function turning a bare vector into a vector labelled by the name of the dofs of the body,
-        to be used for instance for the computation of RAO."""
-        return xr.DataArray(data=np.asarray(vector), dims=['influenced_dof'],
-                            coords={'influenced_dof': list(self.dofs)},
-                            )
+    # def add_dofs_labels_to_vector(self, vector):
+    #     """Helper function turning a bare vector into a vector labelled by the name of the dofs of the body,
+    #     to be used for instance for the computation of RAO."""
+    #     return xr.DataArray(data=np.asarray(vector), dims=['influenced_dof'],
+    #                         coords={'influenced_dof': list(self.dofs)},
+    #                         )
 
-    def add_dofs_labels_to_matrix(self, matrix):
-        """Helper function turning a bare matrix into a matrix labelled by the name of the dofs of the body,
-        to be used for instance for the computation of RAO."""
-        return xr.DataArray(data=np.asarray(matrix), dims=['influenced_dof', 'radiating_dof'],
-                            coords={'influenced_dof': list(self.dofs), 'radiating_dof': list(self.dofs)},
-                            )
+    # def add_dofs_labels_to_matrix(self, matrix):
+    #     """Helper function turning a bare matrix into a matrix labelled by the name of the dofs of the body,
+    #     to be used for instance for the computation of RAO."""
+    #     return xr.DataArray(data=np.asarray(matrix), dims=['influenced_dof', 'radiating_dof'],
+    #                         coords={'influenced_dof': list(self.dofs), 'radiating_dof': list(self.dofs)},
+                            # )
 
     ###################
     # Transformations #
@@ -252,22 +248,22 @@ class Body():#Abstract3DObject):
                 dofs[new_dof_name] = new_dof
         return dofs
 
-    def copy(self, name=None) -> 'Body':
-        """Return a deep copy of the body.
+    # def copy(self, name=None) -> 'Body':
+    #     """Return a deep copy of the body.
 
-        Parameters
-        ----------
-        name : str, optional
-            a name for the new copy
-        """
-        new_body = copy.deepcopy(self)
-        if name is None:
-            new_body.name = f"copy_of_{self.name}"
-            LOG.debug(f"Copy {self.name}.")
-        else:
-            new_body.name = name
-            LOG.debug(f"Copy {self.name} under the name {name}.")
-        return new_body
+    #     Parameters
+    #     ----------
+    #     name : str, optional
+    #         a name for the new copy
+    #     """
+    #     new_body = copy.deepcopy(self)
+    #     if name is None:
+    #         new_body.name = f"copy_of_{self.name}"
+    #         LOG.debug(f"Copy {self.name}.")
+    #     else:
+    #         new_body.name = name
+    #         LOG.debug(f"Copy {self.name} under the name {name}.")
+    #     return new_body
 
     # def assemble_regular_array(self, distance, nb_bodies):
     #     """Create an regular array of identical bodies.
@@ -294,141 +290,141 @@ class Body():#Abstract3DObject):
     #             array_dofs[f'{i}_{j}__{dof_name}'] = new_dof
     #     return FloatingBody(mesh=array_mesh, dofs=array_dofs, name=f"array_of_{self.name}")
 
-    def extract_faces(self, id_faces_to_extract, return_index=False):
-        """Create a new FloatingBody by extracting some faces from the mesh.
-        The dofs evolve accordingly.
-        """
-        if isinstance(self.mesh):
-            raise NotImplementedError  # TODO
+    # def extract_faces(self, id_faces_to_extract, return_index=False):
+    #     """Create a new FloatingBody by extracting some faces from the mesh.
+    #     The dofs evolve accordingly.
+    #     """
+    #     if isinstance(self.mesh):
+    #         raise NotImplementedError  # TODO
 
-        if return_index:
-            new_mesh, id_v = Mesh.extract_faces(self.mesh, id_faces_to_extract, return_index)
-        else:
-            new_mesh = Mesh.extract_faces(self.mesh, id_faces_to_extract, return_index)
-        new_body = Body(new_mesh)
-        LOG.info(f"Extract floating body from {self.name}.")
+    #     if return_index:
+    #         new_mesh, id_v = Mesh.extract_faces(self.mesh, id_faces_to_extract, return_index)
+    #     else:
+    #         new_mesh = Mesh.extract_faces(self.mesh, id_faces_to_extract, return_index)
+    #     new_body = Body(new_mesh)
+    #     LOG.info(f"Extract floating body from {self.name}.")
 
-        new_body.dofs = {}
-        for name, dof in self.dofs.items():
-            new_body.dofs[name] = dof[id_faces_to_extract, :]
+    #     new_body.dofs = {}
+    #     for name, dof in self.dofs.items():
+    #         new_body.dofs[name] = dof[id_faces_to_extract, :]
 
-        if return_index:
-            return new_body, id_v
-        else:
-            return new_body
+    #     if return_index:
+    #         return new_body, id_v
+    #     else:
+    #         return new_body
 
     # def sliced_by_plane(self, plane):
     #     return FloatingBody(mesh=self.mesh.sliced_by_plane(plane), dofs=self.dofs, name=self.name)
 
-    def minced(self, nb_slices=(8, 8, 4)):
-        """Experimental method decomposing the mesh as a hierarchical structure.
+    # def minced(self, nb_slices=(8, 8, 4)):
+    #     """Experimental method decomposing the mesh as a hierarchical structure.
 
-        Parameters
-        ----------
-        nb_slices: Tuple[int, int, int]
-            The number of slices in each of the x, y and z directions.
-            Only powers of 2 are supported at the moment.
+    #     Parameters
+    #     ----------
+    #     nb_slices: Tuple[int, int, int]
+    #         The number of slices in each of the x, y and z directions.
+    #         Only powers of 2 are supported at the moment.
 
-        Returns
-        -------
-        FloatingBody
-        """
-        minced_body = self.copy()
+    #     Returns
+    #     -------
+    #     FloatingBody
+    #     """
+    #     minced_body = self.copy()
 
-        # Extreme points of the mesh in each directions.
-        x_min, x_max, y_min, y_max, z_min, z_max = self.mesh.axis_aligned_bbox
-        sizes = [(x_min, x_max), (y_min, y_max), (z_min, z_max)]
+    #     # Extreme points of the mesh in each directions.
+    #     x_min, x_max, y_min, y_max, z_min, z_max = self.mesh.axis_aligned_bbox
+    #     sizes = [(x_min, x_max), (y_min, y_max), (z_min, z_max)]
 
-        directions = [np.array(d) for d in [(1, 0, 0), (0, 1, 0), (0, 0, 1)]]
+    #     directions = [np.array(d) for d in [(1, 0, 0), (0, 1, 0), (0, 0, 1)]]
 
-        # def _slice_positions_at_depth(i):
-        #     """Helper function.
+    #     # def _slice_positions_at_depth(i):
+    #     #     """Helper function.
 
-        #     Returns a list of floats as follows:
-        #     i=1 -> [1/2]
-        #     i=2 -> [1/4, 3/4]
-        #     i=3 -> [1/8, 3/8, 5/8, 7/8]
-        #            ...
-        #     """
-        #     denominator = 2**i
-        #     return [numerator/denominator for numerator in range(1, denominator, 2)]
+    #     #     Returns a list of floats as follows:
+    #     #     i=1 -> [1/2]
+    #     #     i=2 -> [1/4, 3/4]
+    #     #     i=3 -> [1/8, 3/8, 5/8, 7/8]
+    #     #            ...
+    #     #     """
+    #     #     denominator = 2**i
+    #     #     return [numerator/denominator for numerator in range(1, denominator, 2)]
 
-        # # GENERATE ALL THE PLANES THAT WILL BE USED TO MINCE THE MESH
-        # planes = []
-        # for direction, nb_slices_in_dir, (min_coord, max_coord) in zip(directions, nb_slices, sizes):
-        #     planes_in_dir = []
+    #     # # GENERATE ALL THE PLANES THAT WILL BE USED TO MINCE THE MESH
+    #     # planes = []
+    #     # for direction, nb_slices_in_dir, (min_coord, max_coord) in zip(directions, nb_slices, sizes):
+    #     #     planes_in_dir = []
 
-        #     depth_of_treelike_structure = int(np.log2(nb_slices_in_dir))
-        #     for i_depth in range(1, depth_of_treelike_structure+1):
-        #         planes_in_dir_at_depth = []
-        #         for relative_position in _slice_positions_at_depth(i_depth):
-        #             slice_position = (min_coord + relative_position*(max_coord-min_coord))*direction
-        #             plane = Plane(normal=direction, point=slice_position)
-        #             planes_in_dir_at_depth.append(plane)
-        #         planes_in_dir.append(planes_in_dir_at_depth)
-        #     planes.append(planes_in_dir)
+    #     #     depth_of_treelike_structure = int(np.log2(nb_slices_in_dir))
+    #     #     for i_depth in range(1, depth_of_treelike_structure+1):
+    #     #         planes_in_dir_at_depth = []
+    #     #         for relative_position in _slice_positions_at_depth(i_depth):
+    #     #             slice_position = (min_coord + relative_position*(max_coord-min_coord))*direction
+    #     #             plane = Plane(normal=direction, point=slice_position)
+    #     #             planes_in_dir_at_depth.append(plane)
+    #     #         planes_in_dir.append(planes_in_dir_at_depth)
+    #     #     planes.append(planes_in_dir)
 
-        # # SLICE THE MESH
-        # intermingled_x_y_z = chain.from_iterable(zip_longest(*planes))
-        # for planes in intermingled_x_y_z:
-        #     if planes is not None:
-        #         for plane in planes:
-        #             minced_body = minced_body.sliced_by_plane(plane)
-        # return minced_body
+    #     # # SLICE THE MESH
+    #     # intermingled_x_y_z = chain.from_iterable(zip_longest(*planes))
+    #     # for planes in intermingled_x_y_z:
+    #     #     if planes is not None:
+    #     #         for plane in planes:
+    #     #             minced_body = minced_body.sliced_by_plane(plane)
+    #     # return minced_body
 
-    @inplace_transformation
-    def mirror(self, plane):
-        self.mesh.mirror(plane)
-        for dof in self.dofs:
-            self.dofs[dof] -= 2 * np.outer(np.dot(self.dofs[dof], plane.normal), plane.normal)
-        for point_attr in ('geometric_center', 'rotation_center', 'center_of_mass'):
-            if point_attr in self.__dict__:
-                self.__dict__[point_attr] -= 2 * (np.dot(self.__dict__[point_attr], plane.normal) - plane.c) * plane.normal
-        return self
+    # @inplace_transformation
+    # def mirror(self, plane):
+    #     self.mesh.mirror(plane)
+    #     for dof in self.dofs:
+    #         self.dofs[dof] -= 2 * np.outer(np.dot(self.dofs[dof], plane.normal), plane.normal)
+    #     for point_attr in ('geometric_center', 'rotation_center', 'center_of_mass'):
+    #         if point_attr in self.__dict__:
+    #             self.__dict__[point_attr] -= 2 * (np.dot(self.__dict__[point_attr], plane.normal) - plane.c) * plane.normal
+    #     return self
 
-    @inplace_transformation
-    def translate(self, *args):
-        self.mesh.translate(*args)
-        for point_attr in ('geometric_center', 'rotation_center', 'center_of_mass'):
-            if point_attr in self.__dict__:
-                self.__dict__[point_attr] += args[0]
-        return self
+    # @inplace_transformation
+    # def translate(self, *args):
+    #     self.mesh.translate(*args)
+    #     for point_attr in ('geometric_center', 'rotation_center', 'center_of_mass'):
+    #         if point_attr in self.__dict__:
+    #             self.__dict__[point_attr] += args[0]
+    #     return self
 
-    @inplace_transformation
-    def rotate(self, axis, angle):
-        matrix = axis.rotation_matrix(angle)
-        self.mesh.rotate(axis, angle)
-        for point_attr in ('geometric_center', 'rotation_center', 'center_of_mass'):
-            if point_attr in self.__dict__:
-                self.__dict__[point_attr] = matrix @ self.__dict__[point_attr]
-        for dof in self.dofs:
-            self.dofs[dof] = (matrix @ self.dofs[dof].T).T
-        return self
+    # @inplace_transformation
+    # def rotate(self, axis, angle):
+    #     matrix = axis.rotation_matrix(angle)
+    #     self.mesh.rotate(axis, angle)
+    #     for point_attr in ('geometric_center', 'rotation_center', 'center_of_mass'):
+    #         if point_attr in self.__dict__:
+    #             self.__dict__[point_attr] = matrix @ self.__dict__[point_attr]
+    #     for dof in self.dofs:
+    #         self.dofs[dof] = (matrix @ self.dofs[dof].T).T
+    #     return self
 
-    @inplace_transformation
-    def clip(self, plane):
-        # Keep of copy of the full mesh
-        if self.full_body is None:
-            self.full_body = self.copy()
+    # @inplace_transformation
+    # def clip(self, plane):
+    #     # Keep of copy of the full mesh
+    #     if self.full_body is None:
+    #         self.full_body = self.copy()
 
-        # Clip mesh
-        LOG.info(f"Clipping {self.name} with respect to {plane}")
-        self.mesh.clip(plane)
+    #     # Clip mesh
+    #     LOG.info(f"Clipping {self.name} with respect to {plane}")
+    #     self.mesh.clip(plane)
 
-        # Clip dofs
-        ids = self.mesh._clipping_data['faces_ids']
-        for dof in self.dofs:
-            if len(ids) > 0:
-                self.dofs[dof] = self.dofs[dof][ids]
-            else:
-                self.dofs[dof] = np.empty((0, 3))
-        return self
+    #     # Clip dofs
+    #     ids = self.mesh._clipping_data['faces_ids']
+    #     for dof in self.dofs:
+    #         if len(ids) > 0:
+    #             self.dofs[dof] = self.dofs[dof][ids]
+    #         else:
+    #             self.dofs[dof] = np.empty((0, 3))
+    #     return self
 
-    def clipped(self, plane, **kwargs):
-        # Same API as for the other transformations
-        return self.clip(plane, inplace=False, **kwargs)
+    # def clipped(self, plane, **kwargs):
+    #     # Same API as for the other transformations
+    #     return self.clip(plane, inplace=False, **kwargs)
 
-    @inplace_transformation
+    # @inplace_transformation
     # def keep_immersed_part(self, free_surface=0.0, sea_bottom=-np.infty):
     #     """Remove the parts of the mesh above the sea bottom and below the free surface."""
     #     self.clip(Plane(normal=(0, 0, 1), point=(0, 0, free_surface)))
@@ -436,43 +432,42 @@ class Body():#Abstract3DObject):
     #         self.clip(Plane(normal=(0, 0, -1), point=(0, 0, sea_bottom)))
     #     return self
 
-    #############
-    #  Display  #
-    #############
+    # #############
+    # #  Display  #
+    # #############
 
-    def __str__(self):
-        return self.name
+    # def __str__(self):
+    #     return self.name
 
-    def __repr__(self):
-        return (f"{self.__class__.__name__}(mesh={self.mesh.name}, "
-                f"dofs={{{', '.join(self.dofs.keys())}}}, name={self.name})")
+    # def __repr__(self):
+    #     return (f"{self.__class__.__name__}(mesh={self.mesh.name}, "
+    #             f"dofs={{{', '.join(self.dofs.keys())}}}, name={self.name})")
 
-    # def show(self, **kwargs):
-    #     from capytaine.ui.vtk.body_viewer import FloatingBodyViewer
-    #     viewer = FloatingBodyViewer()
-    #     viewer.add_body(self, **kwargs)
-    #     viewer.show()
-    #     viewer.finalize()
+    # # def show(self, **kwargs):
+    # #     from capytaine.ui.vtk.body_viewer import FloatingBodyViewer
+    # #     viewer = FloatingBodyViewer()
+    # #     viewer.add_body(self, **kwargs)
+    # #     viewer.show()
+    # #     viewer.finalize()
 
-    def show_matplotlib(self, *args, **kwargs):
-        return self.mesh.show_matplotlib(*args, **kwargs)
+    # def show_matplotlib(self, *args, **kwargs):
+    #     return self.mesh.show_matplotlib(*args, **kwargs)
 
-    def animate(self, motion, *args, **kwargs):
-        """Display a motion as a 3D animation.
+    # def animate(self, motion, *args, **kwargs):
+    #     """Display a motion as a 3D animation.
 
-        Parameters
-        ==========
-        motion: dict or pd.Series or str
-            A dict or series mapping the name of the dofs to its amplitude.
-            If a single string is passed, it is assumed to be the name of a dof
-            and this dof with a unit amplitude will be displayed.
-        """
-        # from capytaine.ui.vtk.animation import Animation
-        # if isinstance(motion, str):
-        #     motion = {motion: 1.0}
-        # elif isinstance(motion, xr.DataArray):
-        #     motion = {k: motion.sel(radiating_dof=k).data for k in motion.coords["radiating_dof"].data}
-        # animation = Animation(*args, **kwargs)
-        # animation._add_actor(self.mesh.merged(), faces_motion=sum(motion[dof_name] * dof for dof_name, dof in self.dofs.items() if dof_name in motion))
-        # return animation
-
+    #     Parameters
+    #     ==========
+    #     motion: dict or pd.Series or str
+    #         A dict or series mapping the name of the dofs to its amplitude.
+    #         If a single string is passed, it is assumed to be the name of a dof
+    #         and this dof with a unit amplitude will be displayed.
+    #     """
+    #     # from capytaine.ui.vtk.animation import Animation
+    #     # if isinstance(motion, str):
+    #     #     motion = {motion: 1.0}
+    #     # elif isinstance(motion, xr.DataArray):
+    #     #     motion = {k: motion.sel(radiating_dof=k).data for k in motion.coords["radiating_dof"].data}
+    #     # animation = Animation(*args, **kwargs)
+    #     # animation._add_actor(self.mesh.merged(), faces_motion=sum(motion[dof_name] * dof for dof_name, dof in self.dofs.items() if dof_name in motion))
+    #     # return animation

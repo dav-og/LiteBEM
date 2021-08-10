@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import litebem.preprocessing.mesh as lpm
 import litebem.preprocessing.body as lpb
-from litebem.preprocessing.bem_problem_definitions import RadiationProblem,DiffractionProblem
+import litebem.preprocessing.bem_problem_definitions as lpd
 
 # reference data
 
@@ -133,7 +133,7 @@ def test_panel_radii():
     for i in range(len(valuesCapList)):
         assert round(valuesCapList[i],13) == round(mesh.panelRadii[i],13)
 
-# tests for compute_polygons function
+# tests for hydrostatic calculations
 
 def test_polygon_length():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
@@ -141,23 +141,17 @@ def test_polygon_length():
     mesh.construct_polygons()
     assert len(mesh.polygons) == 37
 
-# tests for waterplane_area function
-
 def test_waterplane_area():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
     mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     assert round(mesh.waterplaneArea,1) == 3.1
 
-# tests for compute_vol_CoB function
-
-def test_compute_volume_CoB():
+def test_compute_volume_cob():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
     mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
-    volume,zb = mesh.compute_volume_CoB()
+    volume,zb = mesh.compute_volume_cob()
     assert round(volume,3) == 2.071
     assert round(zb,3) == -0.374
-
-# tests for compute_moments_of_area
 
 def test_compute_moments_of_area():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
@@ -165,37 +159,26 @@ def test_compute_moments_of_area():
     moments = mesh.compute_moments_of_area()
     assert len(moments) == 5
 
-# tests for compute_hydrostatic_stiffness
 def test_compute_hydrostatic_stiffness():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
     mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     stiffnessMatrix = mesh.compute_hydrostatic_stiffness(0)
-    assert round(stiffnessMatrix[2,2],0) == 31368 
-    assert round(stiffnessMatrix[3,3],3) == 24.655 
-    assert round(stiffnessMatrix[4,4],3) == 24.655 
+    assert round(stiffnessMatrix[2,2],0) == 31368
+    assert round(stiffnessMatrix[3,3],3) == 24.655
+    assert round(stiffnessMatrix[4,4],3) == 24.655
 
-# TODO: create Body object in pre_processor.mesh that can be passed to
-# RadiationProblem as an argument
-# [ ]
+
+# tests for problem set up
 
 def test_body_definition():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
     mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     body = lpb.Body(mesh)
 
-# test for defining problem objects
 def test_problem_definition():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
     mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
     body = lpb.Body(mesh)
-
     body.add_all_rigid_body_dofs()
-
-    problemR = RadiationProblem(body=body,radiating_dof="Heave",omega=1)
-    problemD = DiffractionProblem(body=body)
-
-# TODO: pass problems to solver
-# [ ]
-
-# TODO: post-processor to return A(w), B(w), f_FK(w) etc
-# [ ]
+    problemR = lpd.RadiationProblem(body=body,radiating_dof="Heave",omega=1)
+    problemD = lpd.DiffractionProblem(body=body)

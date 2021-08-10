@@ -82,7 +82,7 @@ class LinearPotentialFlowProblem:
             )
 
         if self.body is not None:
-            
+
             if (any(self.body.mesh.panelCenters[:, 2] > self.free_surface)
                     or any(self.body.mesh.panelCenters[:, 2] < self.sea_bottom)):
 
