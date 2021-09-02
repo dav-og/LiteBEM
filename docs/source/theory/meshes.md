@@ -12,10 +12,10 @@ The panels of the mesh will either be triangles or quadrangles. The difference
 being that triangle panels only define three unique coordinates while 
 quadrangles define four unique coordinates.
 
-### Normal Vectors
+### Unit Normal Vectors
 
-The normal vectors of the two different panel shapes are calculated
-using the following cross product equations.
+The unit normal vectors of the two different panel shapes are calculated
+using the following cross product equations and dividing by their respective lengths.
 
 $$ 
 Triangle:  \frac{\vec{01}\times\vec{02}}{|\vec{01}\times\vec{02}|}
