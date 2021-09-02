@@ -18,11 +18,11 @@ The normal vectors of the two different panel shapes are calculated
 using the following cross product equations.
 
 $$ 
-Triangle:  \vec{01}\times\vec{02}
+Triangle:  \frac{\vec{01}\times\vec{02}}{|\vec{01}\times\vec{02}|}
 $$
 
 $$ 
-Quadrangle:  \vec{02}\times\vec{13} 
+Quadrangle:  \frac{\vec{02}\times\vec{13}}{|\vec{02}\times\vec{13}|} 
 $$
 
 
@@ -100,7 +100,7 @@ $$
 
 #### First Moment of Area
 
-The first moment of the waterplane area with respect to the x and y axis are used to determine $K_{34}$ and $K_{35}$ (see hydrostatics section). The equation for both of these moments is as follows:
+The first moments of the waterplane area with respect to the x and y axis are used to determine $K_{34}$ and $K_{35}$ (see hydrostatics section). The equation for both of these moments is as follows:
 
 $$
 S_{x} = \int \int_{S_0} y   dS = \frac{1}{6} \sum_{i=1}^{n-1} (y_{i}+y_{i+1})(x_{i}y_{i+1} - x_{i+1}y_{i}) \\
@@ -112,7 +112,7 @@ Where $ S_{0} $ is the waterplane area.
 
 #### Second Moment of Area
 
-The second moment of the waterplane area with respect to the x and y axis are used to determine $K_{44}$ and $K_{55}$ (see hydrostatics section). The equation for both of these moments is as follows:
+The second moments of the waterplane area with respect to the x and y axis are used to determine $K_{44}$ and $K_{55}$ (see hydrostatics section). The equation for both of these moments is as follows:
 
 $$
 I_{x} = \int \int_{S_0} y^{2} dS = \frac{1}{12} \sum_{i=1}^{n-1} (y_{i}^{2}+y_{i}y_{i+1}+y_{i+1}^{2})(x_{i}y_{i+1} - x_{i+1}y_{i}) \\
@@ -125,7 +125,7 @@ $$
 Lastly, the product moment of the waterplane area is used to determine $K_{45}$ (see hydrostatics section). The equation for this moment is as follows:
 
 $$
-I_{x} = \int \int_{S_0} xy dS = \frac{1}{24} \sum_{i=1}^{n-1} (x_{i}y_{i+1} + 2x_{i}y_{i} + 2x_{i+1}y_{i+1} + x_{i+1}y_{i})(x_{i}y_{i+1} - x_{i+1}y_{i})
+I_{xy} = \int \int_{S_0} xy dS = \frac{1}{24} \sum_{i=1}^{n-1} (x_{i}y_{i+1} + 2x_{i}y_{i} + 2x_{i+1}y_{i+1} + x_{i+1}y_{i})(x_{i}y_{i+1} - x_{i+1}y_{i})
 $$
 
 > **Note** that equations for the waterplane area and moments of the waterplane area require the area in question be a simple polygon. That is a polygon without holes and self intersections.
@@ -161,7 +161,7 @@ $$
 Next, the method of composite parts is used to find the "z" component of the center of buoyancy of the mesh:
 
 $$
-z_b = \frac{\sum{(\rho_{w}V_{i})\overline{z_{i}}}}{\rho_{w}V_{total}}
+z_{b} = \frac{\sum{(\rho_{w}V_{i})\overline{z_{i}}}}{\rho_{w}V_{total}}
 $$
 
 Where $\rho_{w}V_{i}$ is the mass of each individual tetrahedron, and 
