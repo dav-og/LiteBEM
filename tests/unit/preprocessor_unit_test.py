@@ -7,6 +7,8 @@ import litebem.preprocessing.bem_problem_definitions as lpd
 # reference data
 
 hemi360Mesh =  f'tests/unit/preprocessorRefData/hemisphere360.nemoh'
+floatMesh = f'tests/unit/preprocessorRefData/float.mar'
+sparMesh = f'tests/unit/preprocessorRefData/spar.mar'
 hemi360Areas = f'tests/unit/preprocessorRefData/hemisphere360PanelAreas.txt'
 hemi360Centers = f'tests/unit/preprocessorRefData/hemisphere360PanelCenters.txt'
 hemi360Normals = f'tests/unit/preprocessorRefData/hemisphere360PanelNormals.txt'
@@ -144,6 +146,8 @@ def test_polygon_length():
 def test_waterplane_area():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
     mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
+    mesh.construct_polygons()
+    mesh.waterplane_area()
     assert round(mesh.waterplaneArea,1) == 3.1
 
 def test_compute_volume_cob():
@@ -156,12 +160,15 @@ def test_compute_volume_cob():
 def test_compute_moments_of_area():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
     mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
+    mesh.construct_polygons()
     moments = mesh.compute_moments_of_area()
     assert len(moments) == 5
 
 def test_compute_hydrostatic_stiffness():
     meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(hemi360Mesh)
     mesh = lpm.Mesh(meshVerts, meshFaces, name=f'hemi360')
+    mesh.construct_polygons()
+    mesh.waterplane_area()
     stiffnessMatrix = mesh.compute_hydrostatic_stiffness(0)
     assert round(stiffnessMatrix[2,2],0) == 31368
     assert round(stiffnessMatrix[3,3],3) == 24.655
@@ -182,3 +189,10 @@ def test_problem_definition():
     body.add_all_rigid_body_dofs()
     problemR = lpd.RadiationProblem(body=body,radiating_dof="Heave",omega=1)
     problemD = lpd.DiffractionProblem(body=body)
+
+def test_CollectionOfMeshes():
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(floatMesh)
+    mesh1 = lpm.Mesh(meshVerts, meshFaces, name=f'float')
+    meshHeader, meshVerts, meshFaces = lpm.read_nemoh_mesh(sparMesh)
+    mesh2 = lpm.Mesh(meshVerts, meshFaces, name=f'spar')
+    collection = lpm.CollectionOfMeshes([mesh1,mesh2],name='rm3')

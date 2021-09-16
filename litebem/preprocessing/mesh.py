@@ -1,5 +1,7 @@
 from os import path
 import numpy as np
+from itertools import accumulate,chain
+from typing import Iterable, Union
 
 class Mesh():
     """Mesh class
@@ -21,11 +23,10 @@ class Mesh():
         self.vertices = vertices
         self.panels = panels
         self.nPanels = len(panels)
+        self.nVertices = len(vertices)
         self.name = 'mesh'
         self.get_triangle_quad_ids()
         self.compute_panel_properties()
-        self.construct_polygons()
-        self.waterplane_area()
 
     def get_triangle_quad_ids(self):
         '''
@@ -373,6 +374,72 @@ class Mesh():
         return (self.panelCenters.reshape((self.nPanels, 1, 3)),  # Points
                 self.panelAreas.reshape((self.nPanels, 1)))       # Weights
 
+class CollectionOfMeshes():
+    """A tuple of meshes.
+    It gives access to all the vertices of all the sub-meshes as if it were a mesh itself.
+    Collections can be nested to store meshes in a tree structure.
+    Parameters
+    ----------
+    meshes: Iterable of Mesh or CollectionOfMeshes
+        meshes in the collection
+    name : str, optional
+        a name for the collection
+    """
+
+    def __init__(self, meshes: Iterable[Union[Mesh, 'CollectionOfMeshes']], name=None):
+
+        self._meshes = tuple(meshes)
+
+        for mesh in self._meshes:
+            assert isinstance(mesh, Mesh) or isinstance(mesh, CollectionOfMeshes)
+
+        self.name = name
+
+        @property
+        def nSubmeshes(self):
+            return len(self)
+
+        @property
+        def nPanels(self):
+            return sum(mesh.nPanels for mesh in self)
+
+        @property
+        def vertices(self):
+            return np.concatenate([mesh.vertices for mesh in self])
+
+        @property
+        def panels(self):
+            """Return the indices of the vertices forming each of the faces. For the
+            later submeshes, the indices of the vertices has to be shifted to
+            correspond to their index in the concatenated array self.vertices.
+            """
+            nPanels = accumulate(chain([0], (mesh.nVertices for mesh in self[:-1])))
+            return np.concatenate([mesh.panels + nbv for mesh, nbv in zip(self, nPanels)])
+
+        @property
+        def panelUnitNormals(self):
+            return np.concatenate([mesh.faces_normals for mesh in self])
+
+        @property
+        def panelAreas(self):
+            return np.concatenate([mesh.panelAreas for mesh in self])
+
+        @property
+        def panelCenters(self):
+            return np.concatenate([mesh.panelCenters for mesh in self])
+
+        @property
+        def panelRadii(self):
+            return np.concatenate([mesh.panelRadii for mesh in self])
+
+        @property
+        def quadraturePoints(self):
+            quadSubmeshes = [mesh.quadraturePoints for mesh in self]
+            return (
+                np.concatenate([quad[0] for quad in quadSubmeshes]),  # Points
+                np.concatenate([quad[1] for quad in quadSubmeshes])   # Weights
+                    )
+
 def read_nemoh_mesh(pathToMesh):#
     '''
     reads nemoh mesh file; return headers, vertices and panels.
@@ -423,4 +490,5 @@ def read_nemoh_mesh(pathToMesh):#
                 continue
             if np.count_nonzero(np.asarray(line.split()) == '0') >= 4:
                 break
+    
     return header, vertices, panels
