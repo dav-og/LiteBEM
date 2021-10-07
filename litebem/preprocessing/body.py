@@ -12,7 +12,7 @@ import numpy as np
 import xarray as xr
 
 #from capytaine.meshes.geometry import Abstract3DObject, Plane, inplace_transformation
-from litebem.preprocessing.mesh import Mesh
+from litebem.preprocessing.mesh import Mesh, CollectionOfMeshes
 #from capytaine.meshes.symmetric import build_regular_array_of_meshes
 #from capytaine.meshes.collections import CollectionOfMeshes
 
@@ -76,7 +76,7 @@ class Body():
         if name is None:
             name = mesh.name
 
-        assert isinstance(mesh, Mesh)# or isinstance(mesh, CollectionOfMeshes)
+        assert isinstance(mesh, Mesh) or isinstance(mesh, CollectionOfMeshes)
         self.mesh = mesh
         self.full_body = None
         self.dofs = dofs
@@ -85,15 +85,15 @@ class Body():
         LOG.info(f"New floating body: {self.name}.")
 
     # @staticmethod
-    # def from_file(filename: str, file_format=None, name=None) -> 'FloatingBody':
-    #     """Create a FloatingBody from a mesh file using meshmagick."""
+    # def from_file(filename: str, file_format=None, name=None) -> 'Body':
+    #     """Create a Body from a mesh file using meshmagick."""
     #     from capytaine.io.mesh_loaders import load_mesh
     #     if name is None:
     #         name = filename
     #     mesh = load_mesh(filename, file_format, name=f"{name}_mesh")
-    #     return FloatingBody(mesh, name=name)
+    #     return Body(mesh, name=name)
 
-    # def __lt__(self, other: 'FloatingBody') -> bool:
+    # def __lt__(self, other: 'Body') -> bool:
     #     """Arbitrary order. The point is to sort together the problems involving the same body."""
     #     return self.name < other.name
 
@@ -216,15 +216,15 @@ class Body():
     # Transformations #
     ###################
 
-    # def __add__(self, body_to_add: 'FloatingBody') -> 'FloatingBody':
-    #     return self.join_bodies(body_to_add)
+    def __add__(self, body_to_add: 'Body') -> 'Body':
+        return self.join_bodies(body_to_add)
 
-    # def join_bodies(*bodies, name=None) -> 'FloatingBody':
-    #     if name is None:
-    #         name = "+".join(body.name for body in bodies)
-    #     meshes = CollectionOfMeshes([body.mesh for body in bodies], name=f"{name}_mesh")
-    #     dofs = FloatingBody.combine_dofs(bodies)
-    #     return FloatingBody(mesh=meshes, dofs=dofs, name=name)
+    def join_bodies(*bodies, name=None) -> 'Body':
+        if name is None:
+            name = "+".join(body.name for body in bodies)
+        meshes = CollectionOfMeshes([body.mesh for body in bodies], name=f"{name}_mesh")
+        dofs = Body.combine_dofs(bodies)
+        return Body(mesh=meshes, dofs=dofs, name=name)
 
     @staticmethod
     def combine_dofs(bodies) -> dict:
@@ -277,7 +277,7 @@ class Body():
 
     #     Returns
     #     -------
-    #     FloatingBody
+    #     Body
     #     """
     #     array_mesh = build_regular_array_of_meshes(self.mesh, distance, nb_bodies)
     #     total_nb_faces = array_mesh.nPanels
@@ -288,10 +288,10 @@ class Body():
     #             new_dof = np.zeros((total_nb_faces, 3))
     #             new_dof[shift_nb_faces:shift_nb_faces+len(dof), :] = dof
     #             array_dofs[f'{i}_{j}__{dof_name}'] = new_dof
-    #     return FloatingBody(mesh=array_mesh, dofs=array_dofs, name=f"array_of_{self.name}")
+    #     return Body(mesh=array_mesh, dofs=array_dofs, name=f"array_of_{self.name}")
 
     # def extract_faces(self, id_faces_to_extract, return_index=False):
-    #     """Create a new FloatingBody by extracting some faces from the mesh.
+    #     """Create a new Body by extracting some faces from the mesh.
     #     The dofs evolve accordingly.
     #     """
     #     if isinstance(self.mesh):
@@ -314,7 +314,7 @@ class Body():
     #         return new_body
 
     # def sliced_by_plane(self, plane):
-    #     return FloatingBody(mesh=self.mesh.sliced_by_plane(plane), dofs=self.dofs, name=self.name)
+    #     return Body(mesh=self.mesh.sliced_by_plane(plane), dofs=self.dofs, name=self.name)
 
     # def minced(self, nb_slices=(8, 8, 4)):
     #     """Experimental method decomposing the mesh as a hierarchical structure.
@@ -327,7 +327,7 @@ class Body():
 
     #     Returns
     #     -------
-    #     FloatingBody
+    #     Body
     #     """
     #     minced_body = self.copy()
 

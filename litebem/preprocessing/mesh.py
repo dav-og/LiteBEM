@@ -24,7 +24,7 @@ class Mesh():
         self.panels = panels
         self.nPanels = len(panels)
         self.nVertices = len(vertices)
-        self.name = 'mesh'
+        self.name = name
         self.get_triangle_quad_ids()
         self.compute_panel_properties()
 
@@ -395,50 +395,60 @@ class CollectionOfMeshes():
 
         self.name = name
 
-        @property
-        def nSubmeshes(self):
-            return len(self)
+    def __iter__(self):
+        return iter(self._meshes)
 
-        @property
-        def nPanels(self):
-            return sum(mesh.nPanels for mesh in self)
+    def __getitem__(self, item):
+        return self._meshes.__getitem__(item)
 
-        @property
-        def vertices(self):
-            return np.concatenate([mesh.vertices for mesh in self])
+    @property
+    def nSubmeshes(self):
+        return len(self)
 
-        @property
-        def panels(self):
-            """Return the indices of the vertices forming each of the faces. For the
-            later submeshes, the indices of the vertices has to be shifted to
-            correspond to their index in the concatenated array self.vertices.
-            """
-            nPanels = accumulate(chain([0], (mesh.nVertices for mesh in self[:-1])))
-            return np.concatenate([mesh.panels + nbv for mesh, nbv in zip(self, nPanels)])
+    @property
+    def nVertices(self):
+        return sum(mesh.nVertices for mesh in self)
 
-        @property
-        def panelUnitNormals(self):
-            return np.concatenate([mesh.faces_normals for mesh in self])
+    @property
+    def nPanels(self):
+        return sum(mesh.nPanels for mesh in self)
 
-        @property
-        def panelAreas(self):
-            return np.concatenate([mesh.panelAreas for mesh in self])
+    @property
+    def vertices(self):
+        return np.concatenate([mesh.vertices for mesh in self])
 
-        @property
-        def panelCenters(self):
-            return np.concatenate([mesh.panelCenters for mesh in self])
+    @property
+    def panels(self):
+        """Return the indices of the vertices forming each of the faces. For the
+        later submeshes, the indices of the vertices has to be shifted to
+        correspond to their index in the concatenated array self.vertices.
+        """
+        nPanels = accumulate(chain([0], (mesh.nVertices for mesh in self[:-1])))
+        return np.concatenate([np.asarray(mesh.panels) + nbv for mesh, nbv in zip(self, nPanels)])
 
-        @property
-        def panelRadii(self):
-            return np.concatenate([mesh.panelRadii for mesh in self])
+    @property
+    def panelUnitNormals(self):
+        return np.concatenate([mesh.panelUnitNormals for mesh in self])
 
-        @property
-        def quadraturePoints(self):
-            quadSubmeshes = [mesh.quadraturePoints for mesh in self]
-            return (
-                np.concatenate([quad[0] for quad in quadSubmeshes]),  # Points
-                np.concatenate([quad[1] for quad in quadSubmeshes])   # Weights
-                    )
+    @property
+    def panelAreas(self):
+        return np.concatenate([mesh.panelAreas for mesh in self])
+
+    @property
+    def panelCenters(self):
+        return np.concatenate([mesh.panelCenters for mesh in self])
+
+    @property
+    def panelRadii(self):
+        return np.concatenate([mesh.panelRadii for mesh in self])
+
+    @property
+    def quadraturePoints(self):
+        quadSubmeshes = [mesh.quadraturePoints for mesh in self]
+        return (
+            np.concatenate([quad[0] for quad in quadSubmeshes]),  # Points
+            np.concatenate([quad[1] for quad in quadSubmeshes])   # Weights
+                )
 
 def read_nemoh_mesh(pathToMesh):#
     '''
@@ -478,6 +488,10 @@ def read_nemoh_mesh(pathToMesh):#
                 continue
             # catch '0 0 0 0' divider in nemoh mesh file
             if np.count_nonzero(np.asarray(line.split()) == '0') >= 4:
+                ftoggle = 1
+                continue
+            # catch '0 0.00 0.00 0.00' divider in .dat mesh file
+            if np.count_nonzero(np.asarray(line.split()) == '0.00') >= 3:
                 ftoggle = 1
                 continue
             # append each vertex to list
