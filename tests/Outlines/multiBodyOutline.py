@@ -2,7 +2,7 @@ import litebem.preprocessing.mesh as lpm
 import litebem.preprocessing.body as lpb
 from litebem.preprocessing.bem_problem_definitions import RadiationProblem,DiffractionProblem
 import litebem.solver.bem_solver as lps
-from litebem.postprocessing.results import assemble_dataset
+import litebem.postprocessing.results as lpr
 import numpy as np
 
 floatMeshPath = f'tests/unit/preprocessorRefData/float-fixed.nemoh'
@@ -38,8 +38,13 @@ solver = lps.BEMSolver()
 
 resultR = solver.solve_all(problems)
 
-dataset = assemble_dataset(resultR)
+dataset = lpr.assemble_dataset(resultR)
 print(dataset)
+dataset = lpr.separate_complex_values(dataset)
+print(dataset)
+
+
+dataset.to_netcdf('../LiteBEM/tests/unit/solverRefData/testdataset.nc')
 # resultFloat = solver.solve(problem1_1)
 
 # print(resultR[0].added_masses)
