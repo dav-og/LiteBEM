@@ -169,4 +169,3 @@ $\overline{z_{i}}$ is the "z" component of the centroid for each tetrahedron.
 
 > **Note** that each tetrahedron has a uniform density, so the centroid is equivalent to the center of gravity. Given that the mesh only includes sections below the water line, and that the density of water is used, the method of composite parts does in fact compute the center of buoyancy.
 
-
