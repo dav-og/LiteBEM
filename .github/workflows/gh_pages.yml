@@ -16,7 +16,10 @@ jobs:
       - name: install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install ".[docs]"
+          python -m pip install sphinx
+          python -m pip install myst-nb
+          python -m pip install myst-parser
+          python -m pip install sphinx-book-theme
       - name: build documentation
         run: |
           cd docs
