@@ -7,8 +7,8 @@ import litebem.preprocessing.bem_problem_definitions as lpd
 # reference data
 
 hemi360Mesh =  f'tests/unit/preprocessorRefData/hemisphere360.nemoh'
-floatMesh = f'tests/unit/preprocessorRefData/float.mar'
-sparMesh = f'tests/unit/preprocessorRefData/spar.mar'
+floatMesh = f'tests/unit/preprocessorRefData/float-fixed.nemoh'
+sparMesh = f'tests/unit/preprocessorRefData/spar-fixed.nemoh'
 hemi360Areas = f'tests/unit/preprocessorRefData/hemisphere360PanelAreas.txt'
 hemi360Centers = f'tests/unit/preprocessorRefData/hemisphere360PanelCenters.txt'
 hemi360Normals = f'tests/unit/preprocessorRefData/hemisphere360PanelNormals.txt'
