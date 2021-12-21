@@ -1,9 +1,22 @@
+from os import name
 import setuptools
+from numpy.distutils.core import setup, Extension
+
+delhommeauSources = ["src/litebem/solver/green_functions/delhommeau_f90/constants.f90",
+                     "src/litebem/solver/green_functions/delhommeau_f90/old_Prony_decomposition.f90",
+                     "src/litebem/solver/green_functions/delhommeau_f90/Green_Rankine.f90",
+                     "src/litebem/solver/green_functions/delhommeau_f90/Initialize_Green_wave.f90",
+                     "src/litebem/solver/green_functions/delhommeau_f90/Green_wave.f90",
+                     "src/litebem/solver/green_functions/delhommeau_f90/matrices.f90"]
+
+delhommeauExtension = Extension(name="litebem.solver.green_functions.delhommeau_f90",
+                                sources=delhommeauSources,
+                                extra_f90_compile_args=['-cpp'])
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-setuptools.setup(
+setup(
     name = 'LiteBEM',
     version="0.0.1",
     author = 'mancellin, dav-og, dunc-lamb',
@@ -19,7 +32,8 @@ setuptools.setup(
         "Operating System :: POSIX :: Linux",
         "Topic :: Scientific/Engineering"
     ],
-    package_dir={"": "litebem"},
-    packages=setuptools.find_packages(where="litebem"),
+    package_dir={"": "src"},
+    packages=setuptools.find_packages(where="src"),
+    ext_modules=[delhommeauExtension],
     python_requires=">=3.0",
 )

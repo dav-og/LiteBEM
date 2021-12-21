@@ -1,0 +1,6 @@
+recursive-include src *.f90
+recursive-include src *.py
+recursive-include src *.so
+recursive-include tests *.nemoh
+recursive-include tests *.py
+recursive-include tests *.txt
