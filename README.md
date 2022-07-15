@@ -1,4 +1,7 @@
-# LiteBEM
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/85766190/179303411-c334f676-2a17-4bad-a529-ff541957e335.PNG" />
+</p>
+
 A lightweight, Apache 2.0 distribution of Matthieu Ancellin's Capytaine BEM code.
 
 ## Requirements
