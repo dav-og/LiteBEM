@@ -4,25 +4,34 @@ A lightweight, Apache 2.0 distribution of Matthieu Ancellin's Capytaine BEM code
 ## Requirements
   - Conda is recommended for managing your Python distribution, dependencies and environment:
     - https://docs.conda.io/en/latest/miniconda.html 
-    - Current development efforts are based on Python 3.9
+    - current development efforts are based on Python 3.9
+  - Microsoft Visual Studio is required for linking the fortran binaries
+    - https://visualstudio.microsoft.com/downloads/
+    - during installation check the box to include **"Desktop development with C++"**
+  - Intel oneAPI HPC toolkit is required for compiling the fortran binaries (you do not need the base kit)
+    - https://www.intel.com/content/www/us/en/developer/tools/oneapi/hpc-toolkit-download.html
+    - install to the default file location
+  - create **"LIB"** environment variable to point towards the intel directory for compiler ".lib" files
+    - if oneAPI is installed to the default location, assign the LIB user variable a value of: "C:\Program Files (x86)\Intel\oneAPI\compiler\2022.1.0\windows\compiler\lib\intel64_win"
+    - if oneAPI is installed to a different location then adjust the path above as necessary
 
-## Installation for Users (Linux Only)
+## Installation for Users
 Recommended approach:
 
-- Open a conda powershell and create a new environment for the LiteBEM project (e.g. "liteBemProject")
+- Open the anaconda powershell and create a new environment for the LiteBEM project (e.g. "liteBemProject")
   ```shell
   > conda create --name liteBemProject python
   ```
 - Install LiteBEM from PyPI by entering the following command within your new environment
 -   ```shell
     > conda activate liteBemProject
-    > python -m pip install LiteBEM
+    > python -m pip install litebem
     ```
 
-## Installation for Developers (Linux Only)
+## Installation for Developers
 Recommended approach:
 
-- Open a conda powershell and create a new environment for LiteBEM-related development (e.g. "liteBemDev")
+- Open the anaconda powershell and create a new environment for LiteBEM-related development (e.g. "liteBemDev")
   ```shell
   > conda create --name liteBemDev python
   ```
@@ -39,7 +48,6 @@ Recommended approach:
 - Install LiteBEM as a developer!
   ```shell
   > cd LiteBEM
-  > python setup.py build_ext
   > pip install -e .
   ```
 - Be sure to check setup.py => install_requires = [...] to ensure that your environment has all required packages installed. You can check your environment's packages using:

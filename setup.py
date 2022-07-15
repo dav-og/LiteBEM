@@ -17,8 +17,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name = 'LiteBEM',
-    version="0.0.1",
+    name = 'litebem',
+    version="1.0.2",
     author = 'mancellin, dav-og, dunc-lamb',
     license = 'Apache-2.0',
     description = 'A lightweight, Apache 2.0 distribution of Matthieu Ancellin`s Capytaine BEM code.',
@@ -29,7 +29,7 @@ setup(
     classifiers=[
         "Programming Language :: Python",
         "License :: OSI Approved :: Apache Software License",
-        "Operating System :: POSIX :: Linux",
+        "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering"
     ],
     package_dir={"": "src"},
