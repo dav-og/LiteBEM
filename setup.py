@@ -11,7 +11,7 @@ delhommeauSources = ["src/litebem/solver/green_functions/delhommeau_f90/constant
 
 delhommeauExtension = Extension(name="litebem.solver.green_functions.delhommeau_f90",
                                 sources=delhommeauSources,
-                                extra_f90_compile_args=['-cpp'])
+                                extra_f90_compile_args=['-fpp'])
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
