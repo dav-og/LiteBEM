@@ -34,9 +34,9 @@ Recommended approach:
 ## Installation for Developers
 Recommended approach:
 
-- Open the anaconda powershell and create a new environment for LiteBEM-related development (e.g. "liteBemDev")
+- Open the anaconda powershell and create a new Python 3.9 environment for LiteBEM-related development (e.g. "liteBemDev")
   ```shell
-  > conda create --name liteBemDev python
+  > conda create --name liteBemDev python=3.9
   ```
 - Install numpy (numpy's f2py is required to compile Fortran code) within your LiteBEM development environment:
   ```shell
